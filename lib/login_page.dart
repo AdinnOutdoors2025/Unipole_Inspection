@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:http/http.dart' as http;
-import 'package:unipole_inspection/screens/home_page.dart';
 import 'package:unipole_inspection/signup_page.dart';
 
 const Color _bgColor = Color(0xFFF6F6F8);
@@ -100,12 +101,8 @@ class _LoginPageState extends State<LoginPage> {
             builder: (_) => LoginSuccessPage(userName: userName),
           ),
         );*/
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => InspectionScreen(),
-          ),
-        );
+
+        Get.toNamed('/inspection', arguments: userName);
       } else {
         setState(() {
           _errorMessage = message;

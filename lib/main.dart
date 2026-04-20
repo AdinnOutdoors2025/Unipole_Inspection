@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:unipole_inspection/screens/home_page.dart';
-import 'auth_service.dart';
-import 'login_page.dart';
-import 'home_page.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
+import 'package:unipole_inspection/screens/inspection_screen.dart';
+import 'binding/inspection_binding.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
+
   runApp(const MyApp());
 }
 
@@ -13,14 +15,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Unipole Inspection',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: /*const SplashCheckPage(),*/
-      InspectionScreen(),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      // home: /*const SplashCheckPage(),*/ InspectionScreen(),
+      initialRoute: '/inspection',
+
+      getPages: [
+        GetPage(
+          name: '/inspection',
+          page: () => InspectionScreen(),
+          binding: InspectionBinding(),
+        ),
+      ],
     );
   }
 }
