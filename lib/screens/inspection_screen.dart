@@ -208,6 +208,7 @@ class InspectionScreen extends StatelessWidget {
                           onPressed: () {
                             print(controller.heightController.text);
                             print(controller.sizeController.text);
+                            print(controller.sizeController.text);
 
                             Get.to(() => MultiStepForm());
                           },
