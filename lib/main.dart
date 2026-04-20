@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:unipole_inspection/screens/inspection_screen.dart';
+import 'package:unipole_inspection/screens/inspection_first_screen.dart';
+import 'package:unipole_inspection/screens/inspection_screens/multi_step_form.dart';
 import 'binding/inspection_binding.dart';
+import 'binding/multi_form_binding.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
-
   runApp(const MyApp());
 }
 
@@ -19,14 +20,18 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Unipole Inspection',
       theme: ThemeData(primarySwatch: Colors.blue),
-      // home: /*const SplashCheckPage(),*/ InspectionScreen(),
       initialRoute: '/inspection',
 
       getPages: [
         GetPage(
           name: '/inspection',
-          page: () => InspectionScreen(),
+          page: () => InspectionFirstScreen(),
           binding: InspectionBinding(),
+        ),
+        GetPage(
+          name: '/multiForm',
+          page: () => MultiStepForm(),
+          binding: MultiFormBinding(),
         ),
       ],
     );

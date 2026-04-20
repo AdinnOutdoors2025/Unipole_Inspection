@@ -1,9 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:unipole_inspection/screens/inspection_screens/question_item.dart';
 import '../../controller/multi_form_controller.dart';
+
+final List<String> step1Questions = [
+  "1. Are there any cracks in the concrete?",
+  "2. Is there any soil erosion at the foundation?",
+  "3. Is there any water stagnation?",
+  "4. Is there any looseness in the anchor bolts?",
+  "5. Are the anchor bolts rusted?",
+  "6. Is the base plate properly seated?",
+  "7. Is there any gap in the base plate?",
+  "8. Is the grouting damaged?",
+  "9. Is the foundation tilted?",
+  "10. Has foundation settlement occurred?",
+  "11. Is the surrounding soil loose?",
+];
+
+final List<String> step2Questions = [
+  "1. Is the post straight?",
+  "2. Is the post tilted?",
+  "3. Is there any bend in the post?",
+  "4. Is there any crack in the welded joint?",
+  "5. Is there any damage in the welded joint?",
+  "6. Is there rust?",
+  "7. Has the paint peeled off?",
+  "8. Has the post thickness reduced?",
+  "9. Are the splice bolts tight?",
+  "10. Is there any looseness in the splice nuts?",
+  "11. Is the ladder secure?",
+  "12. Is the platform strong?",
+];
+
+final List<String> step3Questions = [
+  "1. Is the frame straight?",
+  "2. Is there any bend in the frame?",
+  "3. Are the angle / pipe members strong?",
+  "4. Are the welded joints strong?",
+  "5. Is the flex properly fixed?",
+  "6. Is the flex loose?",
+  "7. Are the clamps tight?",
+  "8. Is there any looseness in the support fasteners?",
+  "9. Is there vibration due to wind?",
+  "10.Is there water runoff / seepage on the structure?",
+];
+
+final List<String> step4Questions = [
+  "1. Is the surrounding area safe?",
+  "2. Are nearby trees touching the structure?",
+  "3. Are there any obstructions?",
+  "4. Is there any wind damage?",
+  "5. Is there any rain damage?",
+  "6. Are there any unauthorized modifications?",
+  "7. Have repairs been carried out properly?",
+];
 
 class MultiStepForm extends StatefulWidget {
   const MultiStepForm({super.key});
@@ -13,8 +66,6 @@ class MultiStepForm extends StatefulWidget {
 }
 
 class _MultiStepFormState extends State<MultiStepForm> {
-  final TextEditingController issueController = TextEditingController();
-
   final List<GlobalKey<FormState>> formKeys = [
     GlobalKey<FormState>(),
     GlobalKey<FormState>(),
@@ -22,7 +73,7 @@ class _MultiStepFormState extends State<MultiStepForm> {
     GlobalKey<FormState>(),
   ];
 
-  final controller = Get.put(MultiFormController());
+  final controller = Get.find<MultiFormController>();
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +83,32 @@ class _MultiStepFormState extends State<MultiStepForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Image.asset('assets/images/adinn_logo.png', height: 40),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Get.back();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Icon(Icons.arrow_back),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Image.asset(
+                    'assets/images/adinn_logo.png',
+                    height: 40,
+                  ),
+                ),
+              ],
             ),
             stepHeader(),
             Expanded(
@@ -152,7 +226,6 @@ class _MultiStepFormState extends State<MultiStepForm> {
       padding: const EdgeInsets.all(10),
       child: SingleChildScrollView(
         child: Container(
-          margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -161,18 +234,7 @@ class _MultiStepFormState extends State<MultiStepForm> {
           ),
           child: Column(
             children: [
-              QuestionItem(question: "1. Are there cracks in the concrete?"),
-              QuestionItem(question: "2. Is the foundation slab loose?"),
-              QuestionItem(question: "3. Is there rust on the anchor bolts?"),
-              QuestionItem(question: "4. Are the anchor plates corroded?"),
-              QuestionItem(question: "5. Is the foundation grout damanged?"),
-              QuestionItem(question: "6. Is the ground/soil settled?"),
-              QuestionItem(question: "7. Is Water pooling around the base?"),
-              QuestionItem(question: "8. Is the Unipole leaning at the base?"),
-              QuestionItem(question: "9. Are the welding joints cracked?"),
-              QuestionItem(
-                question: "10. Is the concrete base disintegrating?",
-              ),
+              buildQuestionList(questions: step1Questions, startIndex: 0),
               stepButtons(),
             ],
           ),
@@ -186,7 +248,6 @@ class _MultiStepFormState extends State<MultiStepForm> {
       padding: const EdgeInsets.all(10),
       child: SingleChildScrollView(
         child: Container(
-          margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -195,43 +256,7 @@ class _MultiStepFormState extends State<MultiStepForm> {
           ),
           child: Column(
             children: [
-              QuestionItem(
-                question: "1. Is the post straight and properly aligned?",
-              ),
-              QuestionItem(
-                question: "2. Is there any damage or crack in the post?",
-              ),
-              QuestionItem(
-                question: "3. Is there rust present on the post surface?",
-              ),
-              QuestionItem(
-                question: "4. Are the bolts and nuts properly tightened?",
-              ),
-              QuestionItem(
-                question: "5. Are the bolts and nuts free from corrosion?",
-              ),
-              QuestionItem(
-                question: "6. Is the post firmly fixed without movement?",
-              ),
-              QuestionItem(
-                question: "7. Is the paint condition of the post good?",
-              ),
-              QuestionItem(
-                question: "8. Is the ladder condition safe and usable?",
-              ),
-              QuestionItem(
-                question: "9. Is the lightning arrestor properly installed?",
-              ),
-              QuestionItem(
-                question:
-                    "10. Is the earthing connection available and proper?",
-              ),
-              QuestionItem(
-                question: "11. Is the platform condition safe and stable?",
-              ),
-              QuestionItem(
-                question: "12. Is the platform free from damage or cracks?",
-              ),
+              buildQuestionList(questions: step2Questions, startIndex: 11),
               stepButtons(),
             ],
           ),
@@ -245,7 +270,6 @@ class _MultiStepFormState extends State<MultiStepForm> {
       padding: const EdgeInsets.all(10),
       child: SingleChildScrollView(
         child: Container(
-          margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -254,18 +278,7 @@ class _MultiStepFormState extends State<MultiStepForm> {
           ),
           child: Column(
             children: [
-              QuestionItem(question: "1. Is the frame straight?"),
-              QuestionItem(question: "2. Is there any bending in the frame?"),
-              QuestionItem(
-                question: "3. Are the angles/wires aligned properly?",
-              ),
-              QuestionItem(question: "4. Are the weld joints proper/aligned?"),
-              QuestionItem(question: "5. Are the panels fitted properly?"),
-              QuestionItem(question: "6. Are the panels loose?"),
-              QuestionItem(question: "7. Are the clamps tight?"),
-              QuestionItem(question: "8. Are the fasteners loose?"),
-              QuestionItem(question: "9. Is there vibration due to wind?"),
-              QuestionItem(question: "10. Is there water leakage?"),
+              buildQuestionList(questions: step3Questions, startIndex: 23),
               stepButtons(),
             ],
           ),
@@ -279,7 +292,6 @@ class _MultiStepFormState extends State<MultiStepForm> {
       padding: const EdgeInsets.all(10),
       child: SingleChildScrollView(
         child: Container(
-          margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -288,20 +300,7 @@ class _MultiStepFormState extends State<MultiStepForm> {
           ),
           child: Column(
             children: [
-              QuestionItem(question: "1. Is the surrounding area safe?"),
-              QuestionItem(
-                question: "2. Are there nearby electrical wires touching?",
-              ),
-              QuestionItem(
-                question: "3. Are the angles/wires aligned properly?",
-              ),
-              QuestionItem(question: "4. Are the weld joints proper/aligned?"),
-              QuestionItem(question: "5. Are the panels fitted properly?"),
-              QuestionItem(question: "6. Are the panels loose?"),
-              QuestionItem(question: "7. Are the clamps tight?"),
-              QuestionItem(question: "8. Are the fasteners loose?"),
-              QuestionItem(question: "9. Is there vibration due to wind?"),
-              QuestionItem(question: "10. Is there water leakage?"),
+              buildQuestionList(questions: step4Questions, startIndex: 33),
               stepButtons(),
             ],
           ),
@@ -309,4 +308,23 @@ class _MultiStepFormState extends State<MultiStepForm> {
       ),
     );
   }
+}
+
+Widget buildQuestionList({
+  required List<String> questions,
+  required int startIndex,
+}) {
+  final controller = Get.find<MultiFormController>();
+
+  return Column(
+    children: List.generate(questions.length, (i) {
+      int index = startIndex + i;
+
+      return QuestionItem(
+        question: questions[i],
+        controller: controller.controllers[index],
+        widgetIndex: index,
+      );
+    }),
+  );
 }

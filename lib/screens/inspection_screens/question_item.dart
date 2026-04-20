@@ -2,154 +2,133 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:unipole_inspection/widgets/video_preview.dart';
+import 'package:video_compress/video_compress.dart';
 import '../../config/app_config.dart';
+import '../../controller/multi_form_controller.dart';
 
 class QuestionItem extends StatefulWidget {
   final String question;
+  final TextEditingController controller;
+  final int widgetIndex;
 
-  const QuestionItem({super.key, required this.question});
+  const QuestionItem({
+    super.key,
+    required this.question,
+    required this.controller,
+    required this.widgetIndex,
+  });
 
   @override
   State<QuestionItem> createState() => _QuestionItemState();
 }
 
 class _QuestionItemState extends State<QuestionItem> {
-  bool isYesSelected = false;
-  List<File> images = [];
-  final ImagePicker picker = ImagePicker();
-
-  Future<void> openCamera() async {
-    final XFile? photo = await picker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 1280,
-      maxHeight: 1280,
-      imageQuality: 90,
-    );
-
-    if (photo != null) {
-      File originalFile = File(photo.path);
-
-      double originalSize = originalFile.lengthSync() / (1024 * 1024);
-
-      File compressedFile = await compressImage(originalFile);
-
-      double compressedSize = compressedFile.lengthSync() / (1024 * 1024);
-
-      print("Original: ${originalSize.toStringAsFixed(2)} MB");
-      print("Compressed: ${compressedSize.toStringAsFixed(2)} MB");
-
-      setState(() {
-        images.add(compressedFile);
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    c.initMediaIfNeeded(widget.widgetIndex);
   }
 
-  Future<File> compressImage(File file) async {
-    final targetPath = file.path.replaceAll(".jpg", "_compressed.jpg");
-
-    if (!AppConfig.compressImages) {
-      return file;
-    }
-
-    final result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      targetPath,
-      quality: 80,
-      minWidth: 1920,
-      minHeight: 1080,
-    );
-
-    return File(result!.path);
-  }
+  final MultiFormController c = Get.find();
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                widget.question,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+        Obx(() {
+          final isYesSelected = c.getAnswer(widget.widgetIndex);
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.question,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
 
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isYesSelected = true;
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isYesSelected
-                            ? Colors.green
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Text(
-                        "Yes",
-                        style: TextStyle(
-                          color: isYesSelected ? Colors.white : Colors.black,
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        c.setAnswer(widget.widgetIndex, true);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isYesSelected
+                              ? Colors.green
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Text(
+                          "Yes",
+                          style: TextStyle(
+                            color: isYesSelected ? Colors.white : Colors.black,
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isYesSelected = false;
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: !isYesSelected
-                            ? Colors.grey.shade300
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Text(
-                        "No",
-                        style: TextStyle(
-                          color: !isYesSelected ? Colors.black : Colors.grey,
+                    GestureDetector(
+                      onTap: () {
+                        c.setAnswer(widget.widgetIndex, false);
+                        widget.controller.clear(); // clear text
+                        c.mediaPerQuestion[widget.widgetIndex]
+                            ?.clear(); //optional: clear media also
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: !isYesSelected
+                              ? Colors.grey.shade300
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Text(
+                          "No",
+                          style: TextStyle(
+                            color: !isYesSelected ? Colors.black : Colors.grey,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
 
         const SizedBox(height: 10),
+        Obx(() {
+          final isYesSelected = c.getAnswer(widget.widgetIndex);
 
-        if (isYesSelected)
-          Container(
+          if (!isYesSelected) return const SizedBox();
+
+          return Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey.shade300),
@@ -158,147 +137,180 @@ class _QuestionItemState extends State<QuestionItem> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const TextField(
+                TextFormField(
                   decoration: InputDecoration(
                     hintText: "Write issue details",
                     border: InputBorder.none,
                   ),
+                  controller: widget.controller,
                 ),
-                images.isNotEmpty
-                    ? Row(
-                        children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 50,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: images.length + 1,
-                                itemBuilder: (context, index) {
-                                  if (index == images.length) {
-                                    return GestureDetector(
-                                      onTap: showPickerDialog,
-                                      child: Container(
-                                        width: 60,
-                                        margin: const EdgeInsets.only(right: 8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.shade300,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        child: const Icon(Icons.add, size: 30),
-                                      ),
-                                    );
-                                  }
 
+                Obx(() {
+                  final mediaList =
+                      c.mediaPerQuestion[widget.widgetIndex] ?? [];
+
+                  if (mediaList.isNotEmpty) {
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 60,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: mediaList.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == mediaList.length) {
                                   return GestureDetector(
-                                    onTap: () => showPreview(index),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 8),
-                                      child: Stack(
-                                        children: [
-                                          Image.file(
-                                            images[index],
-                                            height: 70,
-                                            width: 50,
-                                            fit: BoxFit.cover,
-                                          ),
-
-                                          Positioned(
-                                            right: 0,
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  images.removeAt(index);
-                                                });
-                                              },
-                                              child: const Icon(
-                                                Icons.close,
-                                                color: Colors.red,
-                                                size: 17,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                    onTap: () =>
+                                        showPickerDialog(widget.widgetIndex),
+                                    child: Container(
+                                      width: 60,
+                                      margin: const EdgeInsets.only(right: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade300,
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
+                                      child: const Icon(Icons.add, size: 30),
                                     ),
                                   );
-                                },
-                              ),
+                                }
+
+                                final item = mediaList[index];
+
+                                return GestureDetector(
+                                  onTap: () =>
+                                      showPreview(widget.widgetIndex, index),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          height: 70,
+                                          width: 60,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                            color: Colors.black12,
+                                          ),
+                                          child: item.isVideo
+                                              ? Stack(
+                                                  alignment: Alignment.center,
+                                                  children: const [
+                                                    Icon(
+                                                      Icons.videocam,
+                                                      color: Colors.white,
+                                                    ),
+                                                    Icon(
+                                                      Icons.play_circle_fill,
+                                                      size: 22,
+                                                    ),
+                                                  ],
+                                                )
+                                              : ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                  child: Image.file(
+                                                    item.file,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                        ),
+
+                                        Positioned(
+                                          right: 0,
+                                          child: GestureDetector(
+                                            onTap: () => c.removeMedia(
+                                              widget.widgetIndex,
+                                              index,
+                                            ),
+                                            child: const Icon(
+                                              Icons.delete,
+                                              color: Colors.red,
+                                              size: 17,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          GestureDetector(
-                            onTap: openCamera,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: const [
-                                  Icon(Icons.camera_alt, size: 18),
-                                  SizedBox(width: 5),
-                                  Text("Image"),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 5),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              children: const [
-                                Icon(Icons.camera_alt, size: 18),
-                                SizedBox(width: 5),
-                                Text("Video"),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => c.pickImage(widget.widgetIndex),
+                          child: buildBtn("Image"),
+                        ),
+                        const SizedBox(width: 5),
+                        GestureDetector(
+                          onTap: () => c.pickVideo(widget.widgetIndex),
+                          child: buildBtn("Video"),
+                        ),
+                      ],
+                    );
+                  }
+                }),
                 SizedBox(height: 10),
-                if (images.isNotEmpty)
-                  Row(
-                    children: [
-                      const Text(
+
+                Obx(() {
+                  final mediaList =
+                      c.mediaPerQuestion[widget.widgetIndex] ?? [];
+                  if (mediaList.isEmpty) return const SizedBox();
+
+                  return Row(
+                    children: const [
+                      Text(
                         "• Live Camera Only",
                         style: TextStyle(fontSize: 11),
                       ),
-                      const SizedBox(width: 5),
-                      const Text(
+                      SizedBox(width: 5),
+                      Text(
                         "• No gallery Upload",
                         style: TextStyle(fontSize: 11),
                       ),
-                      const SizedBox(width: 5),
-                      const Text(
+                      SizedBox(width: 5),
+                      Text(
                         "• Maximum 10 files",
                         style: TextStyle(fontSize: 11),
                       ),
                     ],
-                  ),
+                  );
+                }),
               ],
             ),
-          ),
+          );
+        }),
       ],
     );
   }
 
-  void showPreview(int initialIndex) {
+  Widget buildBtn(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade300,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.camera_alt, size: 18),
+          const SizedBox(width: 5),
+          Text(text),
+        ],
+      ),
+    );
+  }
+
+  void showPreview(int qIndex, int initialIndex) {
+    final MultiFormController c = Get.find();
+
     PageController controller = PageController(initialPage: initialIndex);
     int currentIndex = initialIndex;
 
@@ -308,6 +320,8 @@ class _QuestionItemState extends State<QuestionItem> {
         builder: (_) {
           return StatefulBuilder(
             builder: (context, setDialogState) {
+              final mediaList = c.mediaPerQuestion[widget.widgetIndex] ?? [];
+
               return Scaffold(
                 backgroundColor: Colors.black,
 
@@ -320,24 +334,22 @@ class _QuestionItemState extends State<QuestionItem> {
                   ),
                   centerTitle: true,
                   title: Text(
-                    "${currentIndex + 1}/${images.length}",
-                    style: const TextStyle(fontSize: 14, color: Colors.white),
+                    "${currentIndex + 1}/${mediaList.length}",
+                    style: const TextStyle(color: Colors.white),
                   ),
                   actions: [
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.white),
                       onPressed: () {
-                        setState(() {
-                          images.removeAt(currentIndex);
-                        });
+                        c.removeMedia(qIndex, currentIndex);
 
-                        if (images.isEmpty) {
+                        if (mediaList.isEmpty) {
                           Navigator.pop(context);
                           return;
                         }
 
-                        if (currentIndex >= images.length) {
-                          currentIndex = images.length - 1;
+                        if (currentIndex >= mediaList.length) {
+                          currentIndex = mediaList.length - 1;
                         }
 
                         setDialogState(() {});
@@ -345,20 +357,30 @@ class _QuestionItemState extends State<QuestionItem> {
                     ),
                   ],
                 ),
+
                 body: PageView.builder(
                   controller: controller,
-                  itemCount: images.length,
+                  itemCount: mediaList.length,
                   onPageChanged: (index) {
                     setDialogState(() {
                       currentIndex = index;
                     });
                   },
                   itemBuilder: (context, index) {
+                    final item = mediaList[index];
+
+                    if (item.isVideo) {
+                      return VideoPreview(
+                        key: ValueKey(item.file.path),
+                        file: item.file,
+                      );
+                    }
+
                     return InteractiveViewer(
                       minScale: 1,
                       maxScale: 4,
                       child: Center(
-                        child: Image.file(images[index], fit: BoxFit.contain),
+                        child: Image.file(item.file, fit: BoxFit.contain),
                       ),
                     );
                   },
@@ -377,6 +399,7 @@ class _QuestionItemState extends State<QuestionItem> {
                         "Swipe to view",
                         style: TextStyle(color: Colors.white70),
                       ),
+
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
@@ -386,19 +409,8 @@ class _QuestionItemState extends State<QuestionItem> {
                           ),
                         ),
                         onPressed: () async {
-                          final XFile? newPhoto = await picker.pickImage(
-                            source: ImageSource.camera,
-                          );
-
-                          if (newPhoto != null) {
-                            File newFile = File(newPhoto.path);
-
-                            setDialogState(() {
-                              images[currentIndex] = newFile;
-                            });
-
-                            setState(() {});
-                          }
+                          await c.retake(qIndex, currentIndex);
+                          setDialogState(() {});
                         },
                         icon: const Icon(Icons.camera_alt),
                         label: const Text("Retake"),
@@ -414,7 +426,7 @@ class _QuestionItemState extends State<QuestionItem> {
     );
   }
 
-  void showPickerDialog() {
+  void showPickerDialog(int qIndex) {
     showDialog(
       context: context,
       builder: (context) {
@@ -440,7 +452,7 @@ class _QuestionItemState extends State<QuestionItem> {
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
-                        openCamera();
+                        c.pickImage(qIndex);
                       },
                       child: Column(
                         children: const [
@@ -454,6 +466,7 @@ class _QuestionItemState extends State<QuestionItem> {
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
+                        c.pickVideo(qIndex);
                       },
                       child: Column(
                         children: const [

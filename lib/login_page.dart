@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:http/http.dart' as http;
-import 'package:unipole_inspection/signup_page.dart';
 
 const Color _bgColor = Color(0xFFF6F6F8);
 const Color _headerColor = _bgColor;
@@ -136,11 +135,6 @@ class _LoginPageState extends State<LoginPage> {
     /*ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Signup page not added yet.')),
     );*/
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => SignupPage()),
-    );
   }
 
   @override
