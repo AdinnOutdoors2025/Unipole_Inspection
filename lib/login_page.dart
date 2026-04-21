@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:http/http.dart' as http;
 
 const Color _bgColor = Color(0xFFF6F6F8);
@@ -239,7 +240,8 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                     SizedBox(height: gap1),
                                     Text(
-                                      'Welcome Back!',
+                                    //  'Welcome Back!',
+                                      "welcome_back".tr,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: _textBlack,
@@ -301,8 +303,8 @@ class _LoginPageState extends State<LoginPage> {
                                         },
                                         child: Icon(
                                           _showPassword
-                                              ? Icons.visibility_off_rounded
-                                              : Icons.visibility_rounded,
+                                              ? Icons.visibility_rounded
+                                              : Icons.visibility_off_rounded,
                                           color: _red2,
                                           size: 28,
                                         ),

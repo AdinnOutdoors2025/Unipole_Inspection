@@ -81,7 +81,7 @@ class _QuestionItemState extends State<QuestionItem> {
                           borderRadius: BorderRadius.circular(25),
                         ),
                         child: Text(
-                          "Yes",
+                          "yes".tr,
                           style: TextStyle(
                             color: isYesSelected ? Colors.white : Colors.black,
                           ),
@@ -108,7 +108,7 @@ class _QuestionItemState extends State<QuestionItem> {
                           borderRadius: BorderRadius.circular(25),
                         ),
                         child: Text(
-                          "No",
+                          "no".tr,
                           style: TextStyle(
                             color: !isYesSelected ? Colors.black : Colors.grey,
                           ),

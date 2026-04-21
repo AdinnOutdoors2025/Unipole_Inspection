@@ -1,61 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:unipole_inspection/screens/inspection_screens/question_item.dart';
 import '../../controller/multi_form_controller.dart';
 
 final List<String> step1Questions = [
-  "1. Are there any cracks in the concrete?",
-  "2. Is there any soil erosion at the foundation?",
-  "3. Is there any water stagnation?",
-  "4. Is there any looseness in the anchor bolts?",
-  "5. Are the anchor bolts rusted?",
-  "6. Is the base plate properly seated?",
-  "7. Is there any gap in the base plate?",
-  "8. Is the grouting damaged?",
-  "9. Is the foundation tilted?",
-  "10. Has foundation settlement occurred?",
-  "11. Is the surrounding soil loose?",
+  "foundation_form_f1",
+  "foundation_form_f2",
+  "foundation_form_f3",
+  "foundation_form_f4",
+  "foundation_form_f5",
+  "foundation_form_f6",
+  "foundation_form_f7",
+  "foundation_form_f8",
+  "foundation_form_f9",
+  "foundation_form_f10",
+  "foundation_form_f11",
 ];
 
 final List<String> step2Questions = [
-  "1. Is the post straight?",
-  "2. Is the post tilted?",
-  "3. Is there any bend in the post?",
-  "4. Is there any crack in the welded joint?",
-  "5. Is there any damage in the welded joint?",
-  "6. Is there rust?",
-  "7. Has the paint peeled off?",
-  "8. Has the post thickness reduced?",
-  "9. Are the splice bolts tight?",
-  "10. Is there any looseness in the splice nuts?",
-  "11. Is the ladder secure?",
-  "12. Is the platform strong?",
+  "post_form_p1",
+  "post_form_p2",
+  "post_form_p3",
+  "post_form_p4",
+  "post_form_p5",
+  "post_form_p6",
+  "post_form_p7",
+  "post_form_p8",
+  "post_form_p9",
+  "post_form_p10",
+  "post_form_p11",
+  "post_form_p12",
 ];
 
 final List<String> step3Questions = [
-  "1. Is the frame straight?",
-  "2. Is there any bend in the frame?",
-  "3. Are the angle / pipe members strong?",
-  "4. Are the welded joints strong?",
-  "5. Is the flex properly fixed?",
-  "6. Is the flex loose?",
-  "7. Are the clamps tight?",
-  "8. Is there any looseness in the support fasteners?",
-  "9. Is there vibration due to wind?",
-  "10.Is there water runoff / seepage on the structure?",
+  "adBoard_form_a1",
+  "adBoard_form_a2",
+  "adBoard_form_a3",
+  "adBoard_form_a4",
+  "adBoard_form_a5",
+  "adBoard_form_a6",
+  "adBoard_form_a7",
+  "adBoard_form_a8",
+  "adBoard_form_a9",
+  "adBoard_form_a10",
 ];
 
 final List<String> step4Questions = [
-  "1. Is the surrounding area safe?",
-  "2. Are nearby trees touching the structure?",
-  "3. Are there any obstructions?",
-  "4. Is there any wind damage?",
-  "5. Is there any rain damage?",
-  "6. Are there any unauthorized modifications?",
-  "7. Have repairs been carried out properly?",
+  "safety_form_s1",
+  "safety_form_s2",
+  "safety_form_s3",
+  "safety_form_s4",
+  "safety_form_s5",
+  "safety_form_s6",
+  "safety_form_s7",
+];
+
+final List<List<String>> allSteps = [
+  step1Questions,
+  step2Questions,
+  step3Questions,
+  step4Questions,
 ];
 
 class MultiStepForm extends StatefulWidget {
@@ -126,12 +130,17 @@ class _MultiStepFormState extends State<MultiStepForm> {
   }
 
   Widget stepHeader() {
-    List<String> steps = ["Foundation", "Post", "Ad Board", "Safety"];
+    List<String> steps = [
+      "foundation_form_title",
+      "post_form_title",
+      "adBoard_form_title",
+      "safety_form_title",
+    ];
 
     return Obx(() {
       return Container(
-        margin: const EdgeInsets.all(10),
-        padding: const EdgeInsets.all(15),
+        margin: const EdgeInsets.all(5),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(30),
@@ -139,35 +148,45 @@ class _MultiStepFormState extends State<MultiStepForm> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(4, (index) {
-            return GestureDetector(
-              onTap: () => controller.goToStep(index),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 14,
-                        backgroundColor: controller.currentStep.value >= index
-                            ? Colors.green
-                            : Colors.grey,
-                        child: Text(
-                          "${index + 1}",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        steps[index],
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: controller.currentStep.value >= index
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => controller.goToStep(index),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircleAvatar(
+                          radius: 14,
+                          backgroundColor: controller.currentStep.value >= index
                               ? Colors.green
                               : Colors.grey,
+                          child: Text(
+                            "${index + 1}",
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        SizedBox(width: 5),
+                        Flexible(
+                          child: Text(
+                            steps[index].tr,
+                            maxLines: 2,
+                            style: TextStyle(
+                              fontSize: 9,
+                              overflow: TextOverflow.ellipsis,
+                              color: controller.currentStep.value >= index
+                                  ? Colors.green
+                                  : Colors.grey,
+                              fontWeight: controller.currentStep.value >= index
+                                  ? FontWeight.w500
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           }),
@@ -205,14 +224,14 @@ class _MultiStepFormState extends State<MultiStepForm> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: controller.prevStep,
-                  child: const Text("Back"),
+                  child: Text("back_button".tr),
                 ),
               ),
             if (step > 0) const SizedBox(width: 10),
             Expanded(
               child: ElevatedButton(
                 onPressed: () => controller.nextStep(formKeys[step]),
-                child: Text(step == 3 ? "Submit" : "Next"),
+                child: Text(step == 3 ? "submit_button".tr : "next_button".tr),
               ),
             ),
           ],
@@ -222,72 +241,33 @@ class _MultiStepFormState extends State<MultiStepForm> {
   }
 
   Widget stepOne() {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-          ),
-          child: Column(
-            children: [
-              buildQuestionList(questions: step1Questions, startIndex: 0),
-              stepButtons(),
-            ],
-          ),
-        ),
-      ),
-    );
+    return stepWidget(questions: step1Questions, startIndex: getStartIndex(0));
   }
 
   Widget stepTwo() {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-          ),
-          child: Column(
-            children: [
-              buildQuestionList(questions: step2Questions, startIndex: 11),
-              stepButtons(),
-            ],
-          ),
-        ),
-      ),
-    );
+    return stepWidget(questions: step2Questions, startIndex: getStartIndex(1));
   }
 
   Widget stepThree() {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 6)],
-          ),
-          child: Column(
-            children: [
-              buildQuestionList(questions: step3Questions, startIndex: 23),
-              stepButtons(),
-            ],
-          ),
-        ),
-      ),
-    );
+    return stepWidget(questions: step3Questions, startIndex: getStartIndex(2));
   }
 
   Widget stepFour() {
+    return stepWidget(questions: step4Questions, startIndex: getStartIndex(3));
+  }
+
+  int getStartIndex(int stepIndex) {
+    int start = 0;
+    for (int i = 0; i < stepIndex; i++) {
+      start += allSteps[i].length;
+    }
+    return start;
+  }
+
+  Widget stepWidget({
+    required List<String> questions,
+    required int startIndex,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: SingleChildScrollView(
@@ -300,7 +280,7 @@ class _MultiStepFormState extends State<MultiStepForm> {
           ),
           child: Column(
             children: [
-              buildQuestionList(questions: step4Questions, startIndex: 33),
+              buildQuestionList(questions: questions, startIndex: startIndex),
               stepButtons(),
             ],
           ),
@@ -321,7 +301,7 @@ Widget buildQuestionList({
       int index = startIndex + i;
 
       return QuestionItem(
-        question: questions[i],
+        question: questions[i].tr,
         controller: controller.controllers[index],
         widgetIndex: index,
       );

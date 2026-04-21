@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
+import 'package:unipole_inspection/app_translations.dart';
 import 'package:unipole_inspection/screens/inspection_first_screen.dart';
 import 'package:unipole_inspection/screens/inspection_screens/multi_step_form.dart';
+import 'auth_service.dart';
 import 'binding/inspection_binding.dart';
 import 'binding/multi_form_binding.dart';
+import 'login_page.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final translations = AppTranslations();
+  await translations.loadTranslations();
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+  runApp(MyApp(translations));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AppTranslations translations;
+
+  const MyApp(this.translations, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +30,21 @@ class MyApp extends StatelessWidget {
       title: 'Unipole Inspection',
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/inspection',
-
+      locale: const Locale('en', 'US'),
+      supportedLocales: [Locale('en'), Locale('ta')],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      translations: translations,
+      fallbackLocale: const Locale('en', 'US'),
       getPages: [
+        GetPage(
+          name: '/splashCheckPage',
+          page: () => SplashCheckPage(),
+          //binding: InspectionBinding(),
+        ),
         GetPage(
           name: '/inspection',
           page: () => InspectionFirstScreen(),
@@ -38,7 +60,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/*
 class SplashCheckPage extends StatefulWidget {
   const SplashCheckPage({super.key});
 
@@ -63,17 +84,13 @@ class _SplashCheckPageState extends State<SplashCheckPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => loggedIn ? const HomePage() : const LoginPage(),
+        builder: (_) => loggedIn ? InspectionFirstScreen() : const LoginPage(),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
-}*/
+}

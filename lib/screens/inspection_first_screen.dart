@@ -12,6 +12,8 @@ class InspectionFirstScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTamil = Get.locale?.languageCode == 'ta';
+    final currentLang = Get.locale?.languageCode;
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: SafeArea(
@@ -33,29 +35,92 @@ class InspectionFirstScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Row(
-                        children: const [
-                          Text("தமிழ்", style: TextStyle(color: Colors.red)),
-                          SizedBox(width: 5),
-                          Text("|"),
-                          SizedBox(width: 5),
-                          Text("English", style: TextStyle(color: Colors.red)),
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              Get.updateLocale(const Locale('ta', 'IN'));
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: currentLang == 'ta'
+                                    ? Colors.red
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                "தமிழ்",
+                                style: TextStyle(
+                                  color: currentLang == 'ta'
+                                      ? Colors.white
+                                      : Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 2),
+                          Text("|", style: TextStyle(color: Colors.grey)),
+
+                          const SizedBox(width: 2),
+
+                          GestureDetector(
+                            onTap: () {
+                              Get.updateLocale(const Locale('en', 'US'));
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: currentLang == 'en'
+                                    ? Colors.red
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                "English",
+                                style: TextStyle(
+                                  color: currentLang == 'en'
+                                      ? Colors.white
+                                      : Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
+
                     Image.asset('assets/images/adinn_logo.png', height: 40),
                   ],
                 ),
               ),
-
               const SizedBox(height: 10),
-              const Text(
-                "Fill Inspection Details",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                "inspection_first_screen_title".tr,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: isTamil ? 15 : 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 5),
-              const Text(
-                "Enter unipole details to start inspection",
-                style: TextStyle(color: Colors.grey),
+
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  "inspection_first_screen_subtitle".tr,
+                  style: TextStyle(fontSize: isTamil ? 11 : 15),
+                ),
               ),
 
               const SizedBox(height: 15),
@@ -74,16 +139,16 @@ class InspectionFirstScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       buildTextField(
-                        label: "Unipole Height",
-                        hint: "Enter height",
+                        label: "unipole_height".tr,
+                        hint: "unipole_height_hintText".tr,
                         icon: Icons.height,
                         controller: controller.heightController,
 
                         suffixWidget: Obx(
                           () => Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 5,
-                              vertical: 5,
+                              horizontal: 4,
+                              vertical: 4,
                             ),
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
@@ -112,19 +177,17 @@ class InspectionFirstScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 12),
-
                       buildTextField(
-                        label: "Ad Structure Size",
-                        hint: "Enter size (W x H)",
+                        label: "ad_structure_size".tr,
+                        hint: "ad_structure_size_hintText".tr,
                         icon: Icons.aspect_ratio,
                         controller: controller.sizeController,
                         suffixWidget: Obx(
                           () => Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 5,
-                              vertical: 5,
+                              horizontal: 4,
+                              vertical: 4,
                             ),
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
@@ -160,7 +223,7 @@ class InspectionFirstScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "Visiting Date",
+                            "visiting_date".tr,
                             style: const TextStyle(fontWeight: FontWeight.w500),
                           ),
                         ],
@@ -193,7 +256,7 @@ class InspectionFirstScreen extends StatelessWidget {
                       const SizedBox(height: 12),
 
                       buildTextField(
-                        label: "Visited By",
+                        label: "visiting_by".tr,
                         icon: Icons.person,
                         controller: controller.visitedByController,
                         readOnly: true,
@@ -214,8 +277,8 @@ class InspectionFirstScreen extends StatelessWidget {
                             backgroundColor: Colors.red,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: const Text(
-                            "Next",
+                          child: Text(
+                            "next_button".tr,
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
@@ -246,8 +309,16 @@ class InspectionFirstScreen extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-            ?suffixWidget,
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+
+            // const SizedBox(height: 4),
+            if (suffixWidget != null) suffixWidget,
           ],
         ),
         const SizedBox(height: 10),
@@ -258,6 +329,7 @@ class InspectionFirstScreen extends StatelessWidget {
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: Colors.red),
             hintText: hint,
+            hintStyle: TextStyle(fontSize: 13),
             filled: true,
             fillColor: Colors.grey[100],
             contentPadding: const EdgeInsets.symmetric(vertical: 14),
@@ -277,7 +349,7 @@ class InspectionFirstScreen extends StatelessWidget {
     required Function(String) onChanged,
   }) {
     final isSelected = selectedUnit == unit;
-
+    final isTamil = Get.locale?.languageCode == 'ta';
     return GestureDetector(
       onTap: () {
         onChanged(unit);
@@ -285,13 +357,13 @@ class InspectionFirstScreen extends StatelessWidget {
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: isTamil ? 4 : 7, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(15),
         ),
         child: Text(
-          unit,
+          unit.tr,
           style: TextStyle(
             color: isSelected ? Colors.black : Colors.grey,
             fontWeight: FontWeight.w500,
