@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../auth_service.dart';
 import '../controller/inspection_controller.dart';
 import 'inspection_screens/multi_step_form.dart';
 
 class InspectionFirstScreen extends StatelessWidget {
-  final String? userName;
-
-  InspectionFirstScreen({super.key, this.userName});
+  InspectionFirstScreen({super.key});
 
   final controller = Get.find<InspectionController>();
 
@@ -286,6 +285,13 @@ class InspectionFirstScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await AuthService().logout();
+                  Get.offAllNamed('/login');
+                },
+                child: Text("Logout"),
               ),
             ],
           ),

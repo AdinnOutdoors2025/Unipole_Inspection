@@ -3,8 +3,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:unipole_inspection/app_translations.dart';
+import 'package:unipole_inspection/otp_screen.dart';
 import 'package:unipole_inspection/screens/inspection_first_screen.dart';
 import 'package:unipole_inspection/screens/inspection_screens/multi_step_form.dart';
+import 'package:unipole_inspection/signup_screen.dart';
 import 'auth_service.dart';
 import 'binding/inspection_binding.dart';
 import 'binding/multi_form_binding.dart';
@@ -29,7 +31,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Unipole Inspection',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/inspection',
+      initialRoute: '/otp',
       locale: const Locale('en', 'US'),
       supportedLocales: [Locale('en'), Locale('ta')],
       localizationsDelegates: [
@@ -40,15 +42,21 @@ class MyApp extends StatelessWidget {
       translations: translations,
       fallbackLocale: const Locale('en', 'US'),
       getPages: [
-        GetPage(
-          name: '/splashCheckPage',
-          page: () => SplashCheckPage(),
-          //binding: InspectionBinding(),
-        ),
+        GetPage(name: '/splashCheckPage', page: () => SplashCheckPage()),
+        GetPage(name: '/login', page: () => LoginPage()),
         GetPage(
           name: '/inspection',
           page: () => InspectionFirstScreen(),
           binding: InspectionBinding(),
+        ),
+        GetPage(
+          name: '/otp',
+          page: () => OtpScreen(),
+          //  binding: InspectionBinding(),
+        ),GetPage(
+          name: '/signup',
+          page: () => SignupScreen(),
+          //  binding: InspectionBinding(),
         ),
         GetPage(
           name: '/multiForm',
@@ -81,12 +89,11 @@ class _SplashCheckPageState extends State<SplashCheckPage> {
 
     if (!mounted) return;
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => loggedIn ? InspectionFirstScreen() : const LoginPage(),
-      ),
-    );
+    if (loggedIn) {
+      Get.offAllNamed('/inspection');
+    } else {
+      Get.toNamed('/login');
+    }
   }
 
   @override

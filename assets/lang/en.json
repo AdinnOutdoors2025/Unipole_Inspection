@@ -4,7 +4,7 @@
   "password_hintText": "Password",
   "login_button": "Login",
   "sign_up_button": "Sign Up",
-  "do_not_have_account": "Don't have an account?",
+  "do_not_have_account": "Don't have an account? ",
 
   "inspection_first_screen_title": "Fill Inspection Details",
   "inspection_first_screen_subtitle": "Enter unipole details to start inspection",

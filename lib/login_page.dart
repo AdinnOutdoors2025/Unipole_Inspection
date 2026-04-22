@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:http/http.dart' as http;
+import 'package:unipole_inspection/signup_screen.dart';
+
+import 'auth_service.dart';
 
 const Color _bgColor = Color(0xFFF6F6F8);
 const Color _headerColor = _bgColor;
@@ -22,7 +26,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  static const String _loginUrl = 'http://192.168.0.111:5000/api/auth/login';
+  // static const String _loginUrl = 'http://192.168.0.111:5000/api/auth/login';
 
   // Android emulator use panna:
   // http://10.0.2.2:5000/api/auth/login
@@ -59,50 +63,19 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      final uri = Uri.parse(_loginUrl);
+      final response = await AuthService().login(
+        employeeId: _employeeIdController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-      final response = await http
-          .post(
-            uri,
-            headers: const {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: jsonEncode({
-              'email': _employeeIdController.text.trim(),
-              'password': _passwordController.text.trim(),
-            }),
-          )
-          .timeout(const Duration(seconds: 20));
-
-      Map<String, dynamic> responseJson = {};
-      try {
-        responseJson = jsonDecode(response.body) as Map<String, dynamic>;
-      } catch (_) {
-        responseJson = {};
-      }
-
-      final bool success = responseJson['success'] == true;
-      final String message = (responseJson['message'] ?? 'Something went wrong')
-          .toString();
-
+      final bool success = response['success'] == true;
+      final String message = response['message'] ?? "Something went wrong";
       if (!mounted) return;
-
       if (success) {
-        final data = responseJson['data'] as Map<String, dynamic>?;
+        final data = response['data'] as Map<String, dynamic>?;
         final user = data?['user'] as Map<String, dynamic>?;
 
-        final String userName =
-            (user?['name'] ?? _employeeIdController.text.trim()).toString();
-
-        /*Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => LoginSuccessPage(userName: userName),
-          ),
-        );*/
-
-        Get.toNamed('/inspection', arguments: userName);
+        Get.offAllNamed('/inspection');
       } else {
         setState(() {
           _errorMessage = message;
@@ -119,23 +92,18 @@ class _LoginPageState extends State<LoginPage> {
         _errorMessage = 'Invalid server response';
       });
     } catch (e) {
-      if (!mounted) return;
       setState(() {
-        _errorMessage = 'Something went wrong. Please try again.';
+        _errorMessage = "Something went wrong";
       });
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   void _onSignupTap() {
-    /*ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Signup page not added yet.')),
-    );*/
+    Navigator.push(context, MaterialPageRoute(builder: (_) => SignupScreen()));
   }
 
   @override
@@ -222,7 +190,7 @@ class _LoginPageState extends State<LoginPage> {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          _InspectionPinIcon(size: pinSize),
+                                          InspectionPinIcon(size: pinSize),
                                           const SizedBox(width: 10),
                                           Flexible(
                                             child: Text(
@@ -240,7 +208,6 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                     SizedBox(height: gap1),
                                     Text(
-                                    //  'Welcome Back!',
                                       "welcome_back".tr,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
@@ -251,22 +218,14 @@ class _LoginPageState extends State<LoginPage> {
                                       ),
                                     ),
                                     SizedBox(height: gap2),
-                                    // Text(
-                                    //   'Login to your inspector account',
-                                    //   textAlign: TextAlign.center,
-                                    //   style: TextStyle(
-                                    //     color: _subText,
-                                    //     fontSize: subtitleFont,
-                                    //     fontWeight: FontWeight.w500,
-                                    //   ),
-                                    // ),
                                     SizedBox(height: gap3),
                                     _UnipoleHero(height: heroHeight),
                                     SizedBox(height: gap4),
                                     _CompactTextField(
                                       controller: _employeeIdController,
                                       focusNode: _employeeFocusNode,
-                                      hintText: 'Employee ID / Username',
+                                      hintText:
+                                          'employee_id/username_hintText'.tr,
                                       prefixIcon: Icons.person,
                                       keyboardType: TextInputType.emailAddress,
                                       textInputAction: TextInputAction.next,
@@ -288,7 +247,7 @@ class _LoginPageState extends State<LoginPage> {
                                     _CompactTextField(
                                       controller: _passwordController,
                                       focusNode: _passwordFocusNode,
-                                      hintText: 'Password',
+                                      hintText: 'password_hintText'.tr,
                                       prefixIcon: Icons.lock,
                                       obscureText: !_showPassword,
                                       textInputAction: TextInputAction.done,
@@ -385,7 +344,7 @@ class _LoginPageState extends State<LoginPage> {
                                                   ),
                                                 )
                                               : Text(
-                                                  'Login',
+                                                  'login_button'.tr,
                                                   style: TextStyle(
                                                     color: Colors.white,
                                                     fontSize: isVerySmall
@@ -403,15 +362,15 @@ class _LoginPageState extends State<LoginPage> {
                                         onTap: _onSignupTap,
                                         child: RichText(
                                           text: TextSpan(
-                                            text: "Don't have an account? ",
+                                            text: "do_not_have_account".tr,
                                             style: TextStyle(
                                               color: _subText,
                                               fontSize: isVerySmall ? 15 : 16,
                                               fontWeight: FontWeight.w500,
                                             ),
-                                            children: const [
+                                            children: [
                                               TextSpan(
-                                                text: 'Sign Up',
+                                                text: 'sign_up_button'.tr,
                                                 style: TextStyle(
                                                   color: _red2,
                                                   fontWeight: FontWeight.w800,
@@ -462,7 +421,7 @@ class _SimpleHeader extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
         child: Align(
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.centerRight,
           child: Image.asset(
             'assets/images/adinn_logo.png',
             height: logoHeight,
@@ -474,8 +433,8 @@ class _SimpleHeader extends StatelessWidget {
   }
 }
 
-class _InspectionPinIcon extends StatelessWidget {
-  const _InspectionPinIcon({required this.size});
+class InspectionPinIcon extends StatelessWidget {
+  const InspectionPinIcon({required this.size});
 
   final double size;
 
