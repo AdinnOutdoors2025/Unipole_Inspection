@@ -1,0 +1,48 @@
+final List<String> questionKeys = [
+  "foundation_concrete_cracks",
+  "foundation_soil_erosion_at_foundation",
+  "foundation_water_stagnation",
+  "foundation_anchor_bolt_looseness",
+  "foundation_anchor_bolts_rusted",
+  "foundation_base_plate_properly_seated",
+  "foundation_gap_in_base_plate",
+  "foundation_grouting_damaged",
+  "foundation_foundation_tilted",
+  "foundation_foundation_settlement_occurred",
+  "foundation_surrounding_soil_loose",
+
+  // continue for post...
+  "post_post_straight",
+  "post_post_tilted",
+  "post_bend_in_post",
+  "post_crack_in_welded_joint",
+  "post_damage_in_welded_joint",
+  "post_rust_present",
+  "post_paint_peeled_off",
+  "post_post_thickness_reduced",
+  "post_splice_bolts_tight",
+  "post_splice_nuts_looseness",
+  "post_ladder_secure",
+  "post_platform_strong",
+
+  // continue for ad_board_frame...
+  "ad_board_frame_frame_straight",
+  "ad_board_frame_bend_in_frame",
+  "ad_board_frame_angle_pipe_members_strong",
+  "ad_board_frame_welded_joints_strong",
+  "ad_board_frame_flex_properly_fixed",
+  "ad_board_frame_flex_loose",
+  "ad_board_frame_clamps_tight",
+  "ad_board_frame_support_fasteners_looseness",
+  "ad_board_frame_vibration_due_to_wind",
+  "ad_board_frame_water_runoff_or_seepage_on_structure",
+
+  // continue for general_inspection...
+  "general_inspection_surrounding_area_safe",
+  "general_inspection_nearby_trees_touching_structure",
+  "general_inspection_obstructions_present",
+  "general_inspection_wind_damage",
+  "general_inspection_rain_damage",
+  "general_inspection_unauthorized_modifications",
+  "general_inspection_repairs_carried_out_properly",
+];

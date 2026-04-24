@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Unipole Inspection',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/otp',
+      initialRoute: '/splashCheckPage',
       locale: const Locale('en', 'US'),
       supportedLocales: [Locale('en'), Locale('ta')],
       localizationsDelegates: [
@@ -49,15 +49,8 @@ class MyApp extends StatelessWidget {
           page: () => InspectionFirstScreen(),
           binding: InspectionBinding(),
         ),
-        GetPage(
-          name: '/otp',
-          page: () => OtpScreen(),
-          //  binding: InspectionBinding(),
-        ),GetPage(
-          name: '/signup',
-          page: () => SignupScreen(),
-          //  binding: InspectionBinding(),
-        ),
+        GetPage(name: '/otp', page: () => OtpScreen()),
+        GetPage(name: '/signup', page: () => SignupScreen()),
         GetPage(
           name: '/multiForm',
           page: () => MultiStepForm(),

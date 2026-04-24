@@ -1,13 +1,17 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:unipole_inspection/service/api_constants.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 
 class AuthService {
   static const _storage = FlutterSecureStorage();
   static const _tokenKey = 'jwt_token';
+  static const _inspectionKey = 'inspection_id';
 
   // Unga backend login API URL inga podunga
   // final String loginUrl = 'https://your-domain.com/api/login';
@@ -114,6 +118,7 @@ class AuthService {
         },
         body: jsonEncode({"phone": phone, "otp": otp}),
       );
+
       final responseJson = jsonDecode(response.body);
       print("VERIFY OTP RESPONSE: $responseJson");
       if (response.statusCode == 200) {
@@ -142,8 +147,110 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>> submitInspection({
+    required String location,
+    required String latitude,
+    required String longitude,
+    required String unipoleHeight,
+    required String adStructureSize,
+  }) async {
+    final token = await getToken();
+
+    final body = {
+      "location": location,
+      "latitude": latitude,
+      "longitude": longitude,
+      "unipole_height": unipoleHeight,
+      "ad_structure_size": adStructureSize,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse("${ApiConstants.baseUrl}${ApiConstants.createInspection}"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode(body),
+      );
+
+      final responseJson = jsonDecode(response.body);
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: $responseJson");
+      String message = responseJson['message'] ?? "Something went wrong";
+
+      String? inspectionId = responseJson['data']?['inspection_id'];
+      if (inspectionId != null) {
+        await _storage.write(key: _inspectionKey, value: inspectionId);
+      }
+
+      return {
+        "success": response.statusCode == 200 || response.statusCode == 201,
+        "message": message,
+      };
+    } catch (e) {
+      print("Update Error: $e");
+      return {"success": false, "message": e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> updateInspection({
+    required String inspectionId,
+    required String key,
+    required bool status,
+    required List<File> files,
+  }) async {
+    final token = await getToken();
+
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse("${ApiConstants.baseUrl}/inspections/$inspectionId/update"),
+    );
+
+    request.headers["Authorization"] = "Bearer $token";
+
+    request.fields["${key}_status"] = status.toString();
+
+    for (var file in files) {
+      print("Uploading file: ${file.path}");
+
+      final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
+      final mimeParts = mimeType.split('/');
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          "${key}_images",
+          file.path,
+          contentType: MediaType(mimeParts[0], mimeParts[1]),
+        ),
+      );
+    }
+
+    try {
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+
+      final json = jsonDecode(responseBody);
+      print("Status Code: ${response.statusCode}");
+      print("Response Body: $json");
+
+      return {
+        "success": response.statusCode == 200,
+        "message": json["message"] ?? "Something went wrong",
+      };
+    } catch (e) {
+      print("Update Error: $e");
+      return {"success": false, "message": e.toString()};
+    }
+  }
+
   Future<String?> getToken() async {
     return await _storage.read(key: _tokenKey);
+  }
+
+  Future<String?> getInspectionId() async {
+    return await _storage.read(key: _inspectionKey);
   }
 
   Future<void> logout() async {

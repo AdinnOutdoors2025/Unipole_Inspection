@@ -1,10 +1,15 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:unipole_inspection/auth_service.dart';
 import 'package:video_compress/video_compress.dart';
+import '../config/app_config.dart';
+import '../helper/snackbar.dart';
 import '../model/media_item.dart';
+import '../widgets/question_keys.dart';
 
 class MultiFormController extends GetxController {
   var currentStep = 0.obs;
@@ -13,6 +18,7 @@ class MultiFormController extends GetxController {
   var mediaPerQuestion = <int, RxList<MediaItem>>{}.obs;
   final ImagePicker picker = ImagePicker();
   var yesNoAnswers = <int, bool>{}.obs;
+ // var previousAnswers = <int, bool>{}.obs;
 
   @override
   void onInit() {
@@ -30,8 +36,54 @@ class MultiFormController extends GetxController {
     }
   }
 
-  void setAnswer(int index, bool value) {
+  void setAnswer(int index, bool value) async {
     yesNoAnswers[index] = value;
+  //  if (previousAnswers[index] == value) return;
+   // previousAnswers[index] = value;
+
+    final storage = const FlutterSecureStorage();
+    final inspectionId = await storage.read(key: "inspection_id");
+
+    final key = questionKeys[index];
+
+    final mediaList = getMediaList(index);
+
+    final files = mediaList.map((e) => e.file).toList();
+
+    final result = await AuthService().updateInspection(
+      inspectionId: inspectionId!,
+      key: key,
+      status: true,
+      files: files,
+    );
+
+    if (result["success"]) {
+      AppSnackBar.showSuccess(result["message"]);
+    } else {
+      AppSnackBar.showError(result["message"]);
+    }
+   /* if (value == true) {
+      final mediaList = getMediaList(index);
+      final files = mediaList.map((e) => e.file).toList();
+
+      final result = await AuthService().updateInspection(
+        inspectionId: inspectionId!,
+        key: key,
+        status: true,
+        files: files,
+      );
+
+      handleResult(result);
+    } else {
+      final result = await AuthService().updateInspection(
+        inspectionId: inspectionId!,
+        key: key,
+        status: false,
+        files: [],
+      );
+
+      handleResult(result);
+    }*/
   }
 
   bool getAnswer(int index) {
@@ -45,7 +97,7 @@ class MultiFormController extends GetxController {
     }
 
     if (!stepCompleted[index - 1]) {
-      Get.snackbar("Not allowed", "Complete previous step first");
+      AppSnackBar.showError("Complete previous step first");
       return;
     }
 
@@ -79,21 +131,34 @@ class MultiFormController extends GetxController {
     if (photo == null) return;
 
     File original = File(photo.path);
+
     File compressed = await compressImage(original);
 
     getMediaList(qIndex).add(MediaItem(file: compressed, isVideo: false));
+    if (yesNoAnswers[qIndex] == true) {
+      setAnswer(qIndex, true);
+    }
   }
 
   Future<File> compressImage(File file) async {
-    final targetPath = file.path.replaceAll(".jpg", "_compressed.jpg");
+    if (!AppConfig.compressImages) {
+      return file;
+    }
+
+    final dir = file.parent.path;
+    final targetPath = "$dir/${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+    // final targetPath = file.path.replaceAll(".jpg", "_compressed.jpg");
 
     final result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
       targetPath,
       quality: 80,
+      format: CompressFormat.jpeg,
     );
 
-    return File(result!.path);
+    if (result == null) return file;
+    return File(result.path);
   }
 
   Future<void> pickVideo(int qIndex) async {
@@ -125,9 +190,15 @@ class MultiFormController extends GetxController {
         list.refresh();
       }
     });
+    if (yesNoAnswers[qIndex] == true) {
+      setAnswer(qIndex, true);
+    }
   }
 
   Future<File?> compressVideo(File file) async {
+    if (!AppConfig.compressVideos) {
+      return file;
+    }
     final info = await VideoCompress.compressVideo(
       file.path,
       quality: VideoQuality.MediumQuality,
@@ -181,5 +252,13 @@ class MultiFormController extends GetxController {
     /*for (var c in controllers) {
       c.dispose();
     }*/
+  }
+
+  void handleResult(Map result) {
+    if (result["success"]) {
+      AppSnackBar.showSuccess(result["message"]);
+    } else {
+      AppSnackBar.showError(result["message"]);
+    }
   }
 }

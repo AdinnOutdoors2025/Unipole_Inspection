@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../auth_service.dart';
 import '../controller/inspection_controller.dart';
+import '../widgets/size_Input_formatter.dart';
 import 'inspection_screens/multi_step_form.dart';
 
 class InspectionFirstScreen extends StatelessWidget {
@@ -96,7 +97,6 @@ class InspectionFirstScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     Image.asset('assets/images/adinn_logo.png', height: 40),
                   ],
                 ),
@@ -125,7 +125,7 @@ class InspectionFirstScreen extends StatelessWidget {
               const SizedBox(height: 15),
 
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -177,13 +177,18 @@ class InspectionFirstScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      buildTextField(
-                        label: "ad_structure_size".tr,
-                        hint: "ad_structure_size_hintText".tr,
-                        icon: Icons.aspect_ratio,
-                        controller: controller.sizeController,
-                        suffixWidget: Obx(
-                          () => Container(
+
+                      Obx(
+                        () => buildTextField(
+                          label: "ad_structure_size".tr,
+                          hint: "ad_structure_size_hintText".tr,
+                          icon: Icons.aspect_ratio,
+                          inputFormatters: [
+                            // SizeInputFormatter(controller.sizeUnit.value),
+                            SizeInputFormatter(),
+                          ],
+                          controller: controller.sizeController,
+                          suffixWidget: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 4,
                               vertical: 4,
@@ -215,7 +220,6 @@ class InspectionFirstScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 12),
 
                       Row(
@@ -251,7 +255,145 @@ class InspectionFirstScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-
+                      const SizedBox(height: 20),
+                      buildTextField(
+                        label: "Location",
+                        icon: Icons.location_on_rounded,
+                        controller: controller.locationController,
+                        hint: "Enter address",
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Obx(
+                              () => GestureDetector(
+                                onTap: controller.isFetchingLocation.value
+                                    ? null
+                                    : () => controller.fetchLocation(),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: controller.isFetchingLocation.value
+                                        ? Colors.red
+                                        : Colors.white,
+                                    border: Border.all(
+                                      color: controller.isFetchingLocation.value
+                                          ? Colors.red
+                                          : Colors.grey,
+                                      width: 1,
+                                    ),
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(12),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.location_on),
+                                        SizedBox(width: 5),
+                                        Flexible(
+                                          child: Text(
+                                            controller.isFetchingLocation.value
+                                                ? "Fetching..."
+                                                : controller
+                                                      .isLocationFetched
+                                                      .value
+                                                ? "Location Fetched"
+                                                : "Fetch Location",
+                                            style: TextStyle(
+                                              color:
+                                                  controller
+                                                      .isFetchingLocation
+                                                      .value
+                                                  ? Colors.white
+                                                  : Colors.grey,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Obx(
+                                () => Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: Colors.grey,
+                                      width: 1,
+                                    ),
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(12),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          controller.latitude.value == '--'
+                                              ? "Latitude"
+                                              : controller.latitude.value,
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontWeight:
+                                                controller.latitude.value ==
+                                                    "--"
+                                                ? FontWeight.w100
+                                                : FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Obx(
+                              () => Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: Colors.grey,
+                                    width: 1,
+                                  ),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(12),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        controller.longitude.value == '--'
+                                            ? "Longitude"
+                                            : controller.longitude.value,
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontWeight:
+                                              controller.longitude.value == "--"
+                                              ? FontWeight.w100
+                                              : FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 12),
 
                       buildTextField(
@@ -267,10 +409,7 @@ class InspectionFirstScreen extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            print(controller.heightController.text);
-                            print(controller.sizeController.text);
-                            print(controller.sizeController.text);
-                            Get.toNamed('/multiForm');
+                            controller.submitInspection();
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
@@ -308,6 +447,7 @@ class InspectionFirstScreen extends StatelessWidget {
     bool readOnly = false,
     VoidCallback? onTap,
     Widget? suffixWidget,
+    List<SizeInputFormatter>? inputFormatters,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -332,6 +472,7 @@ class InspectionFirstScreen extends StatelessWidget {
           controller: controller,
           readOnly: readOnly,
           onTap: onTap,
+          inputFormatters: inputFormatters,
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: Colors.red),
             hintText: hint,
