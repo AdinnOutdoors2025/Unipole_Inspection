@@ -3,53 +3,61 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPreview extends StatefulWidget {
-  final File file;
+  final File? file;
+  final String? url;
 
-  const VideoPreview({super.key, required this.file});
+  const VideoPreview({super.key, this.file, this.url});
 
   @override
   State<VideoPreview> createState() => _VideoPreviewState();
 }
 
 class _VideoPreviewState extends State<VideoPreview> {
-  late VideoPlayerController controller;
+  VideoPlayerController? controller;
 
   @override
   void initState() {
     super.initState();
-    controller = VideoPlayerController.file(widget.file)
-      ..initialize().then((_) {
-        setState(() {});
-      });
+
+    if (widget.file != null) {
+      controller = VideoPlayerController.file(widget.file!);
+    } else if (widget.url != null) {
+      controller = VideoPlayerController.networkUrl(Uri.parse(widget.url!));
+    }
+
+    controller?.initialize().then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
-  //  controller.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!controller.value.isInitialized) {
+    if (controller == null || !controller!.value.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
+
     return AspectRatio(
-      aspectRatio: controller.value.aspectRatio,
+      aspectRatio: controller!.value.aspectRatio,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          VideoPlayer(controller),
+          VideoPlayer(controller!),
+
           GestureDetector(
             onTap: () {
               setState(() {
-                controller.value.isPlaying
-                    ? controller.pause()
-                    : controller.play();
+                controller!.value.isPlaying
+                    ? controller!.pause()
+                    : controller!.play();
               });
             },
             child: Icon(
-              controller.value.isPlaying
+              controller!.value.isPlaying
                   ? Icons.pause_circle
                   : Icons.play_circle,
               size: 60,

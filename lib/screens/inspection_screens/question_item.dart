@@ -67,7 +67,7 @@ class _QuestionItemState extends State<QuestionItem> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        c.setAnswer(widget.widgetIndex, true);
+                        c.setAnswerLocal(widget.widgetIndex, true);
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -91,10 +91,11 @@ class _QuestionItemState extends State<QuestionItem> {
 
                     GestureDetector(
                       onTap: () {
-                        c.setAnswer(widget.widgetIndex, false);
+                        c.setAnswerLocal(widget.widgetIndex, false);
                         widget.controller.clear(); // clear text
                         c.mediaPerQuestion[widget.widgetIndex]
                             ?.clear(); //optional: clear media also
+                        c.submitAnswer(widget.widgetIndex);
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -128,163 +129,291 @@ class _QuestionItemState extends State<QuestionItem> {
 
           if (!isYesSelected) return const SizedBox();
 
-          return Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  decoration: InputDecoration(
-                    hintText: "Write issue details",
-                    border: InputBorder.none,
-                  ),
-                  controller: widget.controller,
+          return Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(10),
                 ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextFormField(
+                      decoration: InputDecoration(
+                        hintText: "Write issue details",
+                        border: InputBorder.none,
+                      ),
+                      controller: widget.controller,
+                    ),
 
-                Obx(() {
-                  final mediaList =
-                      c.mediaPerQuestion[widget.widgetIndex] ?? [];
+                    Obx(() {
+                      final mediaList =
+                          c.mediaPerQuestion[widget.widgetIndex] ?? [];
 
-                  if (mediaList.isNotEmpty) {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: 60,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: mediaList.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index == mediaList.length) {
-                                  return GestureDetector(
-                                    onTap: () =>
-                                        showPickerDialog(widget.widgetIndex),
-                                    child: Container(
-                                      width: 60,
-                                      margin: const EdgeInsets.only(right: 8),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade300,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: const Icon(Icons.add, size: 30),
-                                    ),
-                                  );
-                                }
-
-                                final item = mediaList[index];
-
-                                return GestureDetector(
-                                  onTap: () =>
-                                      showPreview(widget.widgetIndex, index),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    child: Stack(
-                                      children: [
-                                        Container(
-                                          height: 70,
+                      if (mediaList.isNotEmpty) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 60,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: mediaList.length + 1,
+                                  itemBuilder: (context, index) {
+                                    if (index == mediaList.length) {
+                                      return GestureDetector(
+                                        onTap: () => showPickerDialog(
+                                          widget.widgetIndex,
+                                        ),
+                                        child: Container(
                                           width: 60,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                            color: Colors.black12,
+                                          margin: const EdgeInsets.only(
+                                            right: 8,
                                           ),
-                                          child: item.isVideo
-                                              ? Stack(
-                                                  alignment: Alignment.center,
-                                                  children: const [
-                                                    Icon(
-                                                      Icons.videocam,
-                                                      color: Colors.white,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade300,
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.add,
+                                            size: 30,
+                                          ),
+                                        ),
+                                      );
+                                    }
+
+                                    final item = mediaList[index];
+
+                                    return GestureDetector(
+                                      onTap: () => showPreview(
+                                        widget.widgetIndex,
+                                        index,
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8,
+                                        ),
+                                        child: /*Stack(
+                                          children: [
+                                            Container(
+                                              height: 70,
+                                              width: 60,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                color: Colors.black12,
+                                              ),
+                                              child: item.isVideo
+                                                  ? Stack(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      children: const [
+                                                        Icon(
+                                                          Icons.videocam,
+                                                          color: Colors.white,
+                                                        ),
+                                                        Icon(
+                                                          Icons
+                                                              .play_circle_fill,
+                                                          size: 22,
+                                                        ),
+                                                      ],
+                                                    )
+                                                  : ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            6,
+                                                          ),
+                                                      child: item.file != null
+                                                          ? Image.file(
+                                                              item.file!,
+                                                              fit: BoxFit.cover,
+                                                            )
+                                                          : item.url != null
+                                                          ? Image.network(
+                                                              item.url!,
+                                                              fit: BoxFit.cover,
+                                                            )
+                                                          : const SizedBox(),
                                                     ),
-                                                    Icon(
-                                                      Icons.play_circle_fill,
-                                                      size: 22,
-                                                    ),
-                                                  ],
-                                                )
-                                              : ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(6),
-                                                  child: Image.file(
-                                                    item.file,
-                                                    fit: BoxFit.cover,
+                                            ),
+
+                                            Positioned(
+                                              right: 2,
+                                              top: 2,
+                                              child: GestureDetector(
+                                                onTap: () => c.removeMedia(
+                                                  widget.widgetIndex,
+                                                  index,
+                                                ),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.close,
+                                                    color: Colors.red,
+                                                    size: 12,
                                                   ),
                                                 ),
-                                        ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),*/ Stack(
+                                          children: [
+                                            Container(
+                                              height: 70,
+                                              width: 60,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                color: Colors.black12,
+                                              ),
+                                              child: item.isVideo
+                                                  ? Stack(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      children: const [
+                                                        Icon(
+                                                          Icons.videocam,
+                                                          color: Colors.white,
+                                                        ),
+                                                        Icon(
+                                                          Icons
+                                                              .play_circle_fill,
+                                                          size: 22,
+                                                        ),
+                                                      ],
+                                                    )
+                                                  : ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            6,
+                                                          ),
+                                                      child: item.file != null
+                                                          ? Image.file(
+                                                              item.file!,
+                                                              fit: BoxFit.cover,
+                                                            )
+                                                          : item.url != null
+                                                          ? Image.network(
+                                                              item.url!,
+                                                              fit: BoxFit.cover,
+                                                            )
+                                                          : const SizedBox(),
+                                                    ),
+                                            ),
 
-                                        Positioned(
-                                          right: 0,
-                                          child: GestureDetector(
-                                            onTap: () => c.removeMedia(
-                                              widget.widgetIndex,
-                                              index,
+                                            /// ✅ LOADING OVERLAY
+                                            if (item.isLoading)
+                                              Positioned.fill(
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black
+                                                        .withOpacity(0.4),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          6,
+                                                        ),
+                                                  ),
+                                                  child: const Center(
+                                                    child: SizedBox(
+                                                      height: 18,
+                                                      width: 18,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+
+                                            /// DELETE BUTTON
+                                            Positioned(
+                                              right: 2,
+                                              top: 2,
+                                              child: GestureDetector(
+                                                onTap: () => c.removeMedia(
+                                                  widget.widgetIndex,
+                                                  index,
+                                                ),
+                                                child: Container(
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                        color: Colors.white,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                  child: const Icon(
+                                                    Icons.close,
+                                                    color: Colors.red,
+                                                    size: 12,
+                                                  ),
+                                                ),
+                                              ),
                                             ),
-                                            child: const Icon(
-                                              Icons.delete,
-                                              color: Colors.red,
-                                              size: 17,
-                                            ),
-                                          ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
+                          ],
+                        );
+                      } else {
+                        return Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () => c.pickImage(widget.widgetIndex),
+                              child: buildBtn("Image"),
+                            ),
+                            const SizedBox(width: 5),
+                            GestureDetector(
+                              onTap: () => c.pickVideo(widget.widgetIndex),
+                              child: buildBtn("Video"),
+                            ),
+                          ],
+                        );
+                      }
+                    }),
+                    SizedBox(height: 10),
+
+                    Obx(() {
+                      final mediaList =
+                          c.mediaPerQuestion[widget.widgetIndex] ?? [];
+                      if (mediaList.isEmpty) return const SizedBox();
+
+                      return Row(
+                        children: const [
+                          Text(
+                            "• Live Camera Only",
+                            style: TextStyle(fontSize: 11),
                           ),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () => c.pickImage(widget.widgetIndex),
-                          child: buildBtn("Image"),
-                        ),
-                        const SizedBox(width: 5),
-                        GestureDetector(
-                          onTap: () => c.pickVideo(widget.widgetIndex),
-                          child: buildBtn("Video"),
-                        ),
-                      ],
-                    );
-                  }
-                }),
-                SizedBox(height: 10),
-
-                Obx(() {
-                  final mediaList =
-                      c.mediaPerQuestion[widget.widgetIndex] ?? [];
-                  if (mediaList.isEmpty) return const SizedBox();
-
-                  return Row(
-                    children: const [
-                      Text(
-                        "• Live Camera Only",
-                        style: TextStyle(fontSize: 11),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        "• No gallery Upload",
-                        style: TextStyle(fontSize: 11),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        "• Maximum 10 files",
-                        style: TextStyle(fontSize: 11),
-                      ),
-                    ],
-                  );
-                }),
-              ],
-            ),
+                          SizedBox(width: 5),
+                          Text(
+                            "• No gallery Upload",
+                            style: TextStyle(fontSize: 11),
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            "• Maximum 7 files",
+                            style: TextStyle(fontSize: 11),
+                          ),
+                        ],
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10),
+            ],
           );
         }),
       ],
@@ -370,17 +499,18 @@ class _QuestionItemState extends State<QuestionItem> {
                     final item = mediaList[index];
 
                     if (item.isVideo) {
-                      return VideoPreview(
-                        key: ValueKey(item.file.path),
-                        file: item.file,
-                      );
+                      return VideoPreview(file: item.file, url: item.url);
                     }
 
                     return InteractiveViewer(
                       minScale: 1,
                       maxScale: 4,
                       child: Center(
-                        child: Image.file(item.file, fit: BoxFit.contain),
+                        child: item.file != null
+                            ? Image.file(item.file!, fit: BoxFit.cover)
+                            : item.url != null
+                            ? Image.network(item.url!, fit: BoxFit.cover)
+                            : const SizedBox(),
                       ),
                     );
                   },

@@ -1,8 +1,15 @@
 import 'dart:io';
 
 class MediaItem {
-  File file;
-  bool isVideo;
+  final File? file;
+  final String? url;
+  final bool isVideo;
+  bool isLoading;
 
-  MediaItem({required this.file, required this.isVideo});
+  MediaItem({
+    this.file,
+    this.url,
+    required this.isVideo,
+    this.isLoading = false,
+  });
 }

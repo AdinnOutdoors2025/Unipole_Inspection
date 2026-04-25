@@ -22,6 +22,7 @@ class InspectionController extends GetxController {
   RxString userName = "".obs;
   var isFetchingLocation = false.obs;
   var isLocationFetched = false.obs;
+  var isExistingInspection = false.obs;
 
   var latitude = '--'.obs;
   var longitude = '--'.obs;
@@ -32,6 +33,7 @@ class InspectionController extends GetxController {
 
     visitedByController = TextEditingController();
     loadUser();
+    loadInspectionData();
     final now = DateTime.now();
     final formattedDate = DateFormat('dd MMMM yyyy').format(now);
 
@@ -123,7 +125,7 @@ class InspectionController extends GetxController {
       return;
     }
 
-    final result = await apiService.submitInspection(
+    final result = await apiService.createInspection(
       location: locationController.text.trim(),
       latitude: latitude.value,
       longitude: longitude.value,
@@ -136,6 +138,29 @@ class InspectionController extends GetxController {
       Get.toNamed('/multiForm');
     } else {
       AppSnackBar.showError(result["message"]);
+    }
+  }
+
+  Future<void> loadInspectionData() async {
+    final res = await apiService.getInspection();
+
+    if (res.success && res.data != null) {
+      isExistingInspection.value = true;
+
+      final data = res.data;
+
+      locationController.text = data.location;
+      heightController.text = data.unipoleHeight;
+      sizeController.text = data.adStructureSize;
+      visitedByController.text = data.visitedBy;
+
+      selectedDate.value = data.visitingDate;
+      latitude.value = data.geoLocation.latitude.toString();
+      longitude.value = data.geoLocation.longitude.toString();
+
+      isLocationFetched.value = true;
+    } else {
+      isExistingInspection.value = false;
     }
   }
 

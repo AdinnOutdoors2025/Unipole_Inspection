@@ -405,19 +405,24 @@ class InspectionFirstScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            controller.submitInspection();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                          ),
-                          child: Text(
-                            "next_button".tr,
-                            style: TextStyle(color: Colors.white),
+                      Obx(
+                        () => SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              controller.submitInspection();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            child: Text(
+                              controller.isExistingInspection.value
+                                  ? "Continue"
+                                  : "next_button".tr,
+
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                       ),

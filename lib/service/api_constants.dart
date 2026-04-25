@@ -6,5 +6,5 @@ class ApiConstants {
   static const String register = "/auth/register";
   static const String verifyOtp = "/auth/verify-otp";
   static const String createInspection = "/inspections";
-  static const String updateInspection = "/inspections/update";
+  static const String getInspectionDetails = "/inspections";
 }

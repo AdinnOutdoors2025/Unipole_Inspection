@@ -230,7 +230,13 @@ class _MultiStepFormState extends State<MultiStepForm> {
             if (step > 0) const SizedBox(width: 10),
             Expanded(
               child: ElevatedButton(
-                onPressed: () => controller.nextStep(formKeys[step]),
+                onPressed: () async {
+                  if (step == 3) {
+                    await controller.openSelfieCameraAndSubmit();
+                  } else {
+                    controller.nextStep(formKeys[step]);
+                  }
+                },
                 child: Text(step == 3 ? "submit_button".tr : "next_button".tr),
               ),
             ),

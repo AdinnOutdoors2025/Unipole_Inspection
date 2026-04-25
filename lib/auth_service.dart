@@ -8,6 +8,8 @@ import 'package:unipole_inspection/service/api_constants.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
 
+import 'model/inspection_model.dart';
+
 class AuthService {
   static const _storage = FlutterSecureStorage();
   static const _tokenKey = 'jwt_token';
@@ -147,7 +149,7 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> submitInspection({
+  Future<Map<String, dynamic>> createInspection({
     required String location,
     required String latitude,
     required String longitude,
@@ -243,6 +245,70 @@ class AuthService {
       print("Update Error: $e");
       return {"success": false, "message": e.toString()};
     }
+  }
+
+  Future<InspectionModel> getInspection() async {
+    final token = await getToken();
+
+    final response = await http.get(
+      Uri.parse("${ApiConstants.baseUrl}${ApiConstants.getInspectionDetails}"),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    final json = jsonDecode(response.body);
+
+    return InspectionModel.fromJson(json);
+  }
+
+  Future<Map> deleteInspectionMedia({
+    required String inspectionId,
+    required String url,
+  }) async {
+    final token = await getToken();
+    final response = await http.post(
+      Uri.parse("${ApiConstants.baseUrl}/inspections/$inspectionId/delete"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({"url": url}),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  Future<Map<String, dynamic>> submitInspection({
+    required String inspectionId,
+    required File file,
+  }) async {
+    final token = await getToken();
+
+    final newPath =
+        "${file.parent.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+    final fixedFile = await file.copy(newPath);
+
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse(
+        "${ApiConstants.baseUrl}/inspections/$inspectionId/submitinspection",
+      ),
+    );
+
+    request.headers['Authorization'] = "Bearer $token";
+
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'selfie_image',
+        fixedFile.path,
+        contentType: MediaType('image', 'jpeg'),
+      ),
+    );
+
+    var response = await request.send();
+    var responseBody = await response.stream.bytesToString();
+
+    return jsonDecode(responseBody);
   }
 
   Future<String?> getToken() async {
