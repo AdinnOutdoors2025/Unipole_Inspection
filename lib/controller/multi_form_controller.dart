@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
@@ -24,6 +26,7 @@ class MultiFormController extends GetxController {
   var isInspectionLoaded = false.obs;
   var isExistingInspection = false.obs;
   var isPrefilling = false;
+  int maxMediaCount = 7;
 
   @override
   void onInit() {
@@ -43,7 +46,10 @@ class MultiFormController extends GetxController {
     }
   }
 
-  Future<Map<String, dynamic>> submitAnswer(int index) async {
+  Future<Map<String, dynamic>> submitAnswer(
+    int index, {
+    File? singleFile,
+  }) async {
     final storage = const FlutterSecureStorage();
     final inspectionId = await storage.read(key: "inspection_id");
     if (inspectionId == null) {
@@ -53,10 +59,11 @@ class MultiFormController extends GetxController {
     final key = questionKeys[index];
     final mediaList = getMediaList(index);
 
-    final files = mediaList
-        .where((e) => e.file != null)
-        .map((e) => e.file!)
-        .toList();
+    final files = singleFile != null
+        ? [singleFile]
+        : getMediaList(
+            index,
+          ).where((e) => e.file != null).map((e) => e.file!).toList();
 
     final status = yesNoAnswers[index] ?? false;
 
@@ -114,6 +121,23 @@ class MultiFormController extends GetxController {
   }
 
   Future<void> pickImage(int qIndex) async {
+    var list = getMediaList(qIndex);
+
+    if (list.length >= maxMediaCount) {
+      Get.snackbar(
+        "Limit",
+        "Max 7 files allowed",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(10),
+        borderRadius: 10,
+        duration: const Duration(seconds: 3),
+        icon: const Icon(Icons.error, color: Colors.white),
+      );
+      return;
+    }
+
     final XFile? photo = await picker.pickImage(
       source: ImageSource.camera,
       maxWidth: 1280,
@@ -125,13 +149,36 @@ class MultiFormController extends GetxController {
 
     File original = File(photo.path);
 
-    File compressed = await compressImage(original);
+    list.add(MediaItem(file: original, isVideo: false, isLoading: true));
+    int index = list.length - 1;
+    list.refresh();
 
-    getMediaList(qIndex).add(MediaItem(file: compressed, isVideo: false));
-    if (yesNoAnswers[qIndex] == true) {
-      //  setAnswer(qIndex, true);
-      submitAnswer(qIndex);
+    try {
+      File compressed = await compressImage(original);
+
+      list[index] = MediaItem(
+        file: compressed,
+        isVideo: false,
+        isLoading: true,
+      );
+      list.refresh();
+
+      if (yesNoAnswers[qIndex] == true) {
+        await submitAnswer(qIndex);
+      }
+
+      list[index] = MediaItem(
+        file: compressed,
+        isVideo: false,
+        isLoading: false,
+      );
+    } catch (e) {
+      list[index] = MediaItem(file: original, isVideo: false, isLoading: false);
+
+      Get.snackbar("Error", "Upload failed");
     }
+
+    list.refresh();
   }
 
   Future<File> compressImage(File file) async {
@@ -141,8 +188,6 @@ class MultiFormController extends GetxController {
 
     final dir = file.parent.path;
     final targetPath = "$dir/${DateTime.now().millisecondsSinceEpoch}.jpg";
-
-    // final targetPath = file.path.replaceAll(".jpg", "_compressed.jpg");
 
     final result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
@@ -161,7 +206,17 @@ class MultiFormController extends GetxController {
     int videoCount = list.where((e) => e.isVideo).length;
 
     if (videoCount >= 3) {
-      Get.snackbar("Limit", "Max 3 videos");
+      Get.snackbar(
+        "Limit",
+        "Max 3 videos allowed",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.TOP,
+        margin: const EdgeInsets.all(10),
+        borderRadius: 10,
+        duration: const Duration(seconds: 3),
+        icon: const Icon(Icons.error, color: Colors.white),
+      );
       return;
     }
 
@@ -177,7 +232,7 @@ class MultiFormController extends GetxController {
     int index = list.length - 1;
     list.refresh();
 
-    /* // compress in background
+    /*// compress in background
     compressVideo(original).then((compressed) {
       if (compressed != null) {
         list[index] = MediaItem(file: compressed, isVideo: true);
@@ -190,17 +245,19 @@ class MultiFormController extends GetxController {
     final compressed = await compressVideo(original);
 
     if (compressed != null) {
-      list[index] = MediaItem(
-        file: compressed,
-        isVideo: true,
-        isLoading: false,
-      );
+      list[index] = MediaItem(file: compressed, isVideo: true, isLoading: true);
       list.refresh();
     }
 
     if (yesNoAnswers[qIndex] == true) {
-      await submitAnswer(qIndex);
+      await submitAnswer(qIndex, singleFile: compressed ?? original);
     }
+    list[index] = MediaItem(
+      file: compressed ?? original,
+      isVideo: true,
+      isLoading: false,
+    );
+    list.refresh();
   }
 
   Future<File?> compressVideo(File file) async {
@@ -239,81 +296,17 @@ class MultiFormController extends GetxController {
     handleResult(result);
   }
 
-  Future<void> retake(int qIndex, int index) async {
-    final list = getMediaList(qIndex);
-    final oldItem = list[index];
-
-    list[index] = MediaItem(
-      file: oldItem.file,
-      url: oldItem.url,
-      isVideo: oldItem.isVideo,
-      isLoading: true,
-    );
-    list.refresh();
-
-    File? newFile;
-
-    if (oldItem.isVideo) {
-      final XFile? video = await picker.pickVideo(
-        source: ImageSource.camera,
-        maxDuration: const Duration(seconds: 30),
-      );
-      if (video == null) {
-        list[index] = oldItem;
-        list.refresh();
-        return;
-      }
-
-      File original = File(video.path);
-      list[index] = MediaItem(file: original, isVideo: true, isLoading: true);
-      list.refresh();
-
-      newFile = await compressVideo(original);
-    } else {
-      final XFile? photo = await picker.pickImage(source: ImageSource.camera);
-      if (photo == null) {
-        list[index] = oldItem;
-        list.refresh();
-        return;
-      }
-
-      File file = File(photo.path);
-      list[index] = MediaItem(file: file, isVideo: false, isLoading: true);
-      list.refresh();
-
-      newFile = await compressImage(file);
-    }
-
-    if (newFile != null) {
-      list[index] = MediaItem(
-        file: newFile,
-        isVideo: oldItem.isVideo,
-        isLoading: true,
-      );
-      list.refresh();
-    }
-
-    if (oldItem.url != null) {
-      await deleteMedia(oldItem.url!);
-    }
-
-    if (yesNoAnswers[qIndex] == true) {
-      await submitAnswer(qIndex);
-    }
-
-    await loadInspectionData();
-  }
-
   final AuthService apiService = AuthService();
 
   Future<void> loadInspectionData() async {
+    isInspectionLoaded.value = false;
     isPrefilling = true;
     final res = await apiService.getInspection();
 
     if (res.success && res.data != null) {
       final data = res.data;
 
-      isInspectionLoaded.value = true;
+      // isInspectionLoaded.value = true;
       isExistingInspection.value = true;
 
       final foundation = data.foundation;
@@ -328,10 +321,11 @@ class MultiFormController extends GetxController {
       final generalInspection = data.generalInspection;
       _prefillGeneral(generalInspection);
     } else {
-      isInspectionLoaded.value = true;
+      //   isInspectionLoaded.value = true;
       isExistingInspection.value = false;
     }
     isPrefilling = false;
+    isInspectionLoaded.value = true;
   }
 
   @override
@@ -341,9 +335,11 @@ class MultiFormController extends GetxController {
 
   void handleResult(Map result) {
     if (result["success"]) {
-      AppSnackBar.showSuccess(result["message"]);
+      if (kDebugMode) {
+        print(result["message"]);
+      }
     } else {
-      AppSnackBar.showError(result["message"]);
+      AppToast.showError(result["message"]);
     }
   }
 
@@ -383,7 +379,6 @@ class MultiFormController extends GetxController {
 
     for (var url in urls) {
       final isVideo = url.toLowerCase().endsWith(".mp4");
-
       list.add(MediaItem(url: url, isVideo: isVideo));
     }
   }
@@ -473,7 +468,7 @@ class MultiFormController extends GetxController {
     _setImages(base + 6, generalInspection.repairsCarriedOutProperly.images);
   }
 
-  Future<void> openSelfieCameraAndSubmit() async {
+  Future<File?> openSelfieCamera() async {
     final cameras = await availableCameras();
 
     CameraDescription? frontCamera;
@@ -485,14 +480,11 @@ class MultiFormController extends GetxController {
       }
     }
 
-    // fallback to back camera if no front
     final selectedCamera = frontCamera ?? cameras.first;
 
     final imageFile = await Get.to(() => CameraScreen(camera: selectedCamera));
 
-    if (imageFile != null) {
-      await submitInspection(imageFile);
-    }
+    return imageFile;
   }
 
   Future<void> submitInspection(File image) async {
@@ -506,9 +498,11 @@ class MultiFormController extends GetxController {
       file: image,
     );
 
-    handleResult(result);
-    if (result["success"] == true) {
-      Get.offAllNamed('/inspection');
+    /* handleResult(result);*/
+    if (result["success"]) {
+      AppToast.showSuccess(result["message"]);
+    } else {
+      AppToast.showError(result["message"]);
     }
   }
 }

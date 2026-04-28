@@ -228,6 +228,29 @@ class AuthService {
         ),
       );
     }
+    /*for (var file in files) {
+      print("Original file: ${file.path}");
+
+      File uploadFile = file;
+
+      // Convert only images
+      final mimeType = lookupMimeType(file.path) ?? '';
+
+      if (mimeType.startsWith('image/')) {
+        uploadFile = await convertToAvif(file);
+      }
+
+      final newMime = lookupMimeType(uploadFile.path) ?? 'image/avif';
+      final mimeParts = newMime.split('/');
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          "${key}_images",
+          uploadFile.path,
+          contentType: MediaType(mimeParts[0], mimeParts[1]),
+        ),
+      );
+    }*/
 
     try {
       var response = await request.send();
@@ -297,13 +320,22 @@ class AuthService {
 
     request.headers['Authorization'] = "Bearer $token";
 
-    request.files.add(
+     request.files.add(
       await http.MultipartFile.fromPath(
         'selfie_image',
         fixedFile.path,
         contentType: MediaType('image', 'jpeg'),
       ),
     );
+   /* final avifFile = await convertToAvif(file);
+
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'selfie_image',
+        avifFile.path,
+        contentType: MediaType('image', 'avif'),
+      ),
+    );*/
 
     var response = await request.send();
     var responseBody = await response.stream.bytesToString();
@@ -349,4 +381,15 @@ class AuthService {
 
     return JwtDecoder.decode(token);
   }
+
+ /* Future<File> convertToAvif(File inputFile) async {
+    final outputPath =
+        "${inputFile.parent.path}/${DateTime.now().millisecondsSinceEpoch}.avif";
+
+    await FFmpegKit.execute(
+      '-i ${inputFile.path} -c:v libaom-av1 -still-picture 1 $outputPath',
+    );
+
+    return File(outputPath);
+  }*/
 }

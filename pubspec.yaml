@@ -44,6 +44,8 @@ dependencies:
   geolocator: ^14.0.2
   permission_handler: ^12.0.1
   camera: ^0.10.5
+  fluttertoast: ^8.2.6
+  flutter_launcher_icons: ^0.14.4
   flutter_localizations:
     sdk: flutter
 
@@ -77,9 +79,15 @@ flutter:
   assets:
     - assets/images/adinn_logo.png
     - assets/images/unipole_hero.png
+    - assets/images/unipole_logo.jpeg
     - .env
     - assets/lang/en.json
     - assets/lang/ta.json
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/unipole_logo.jpeg"
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -111,3 +119,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+

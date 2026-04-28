@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../auth_service.dart';
 import '../controller/inspection_controller.dart';
@@ -8,10 +9,9 @@ import 'inspection_screens/multi_step_form.dart';
 class InspectionFirstScreen extends StatelessWidget {
   InspectionFirstScreen({super.key});
 
-  final controller = Get.find<InspectionController>();
-
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<InspectionController>();
     final isTamil = Get.locale?.languageCode == 'ta';
     final currentLang = Get.locale?.languageCode;
     return Scaffold(
@@ -62,9 +62,6 @@ class InspectionFirstScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-
-                          const SizedBox(width: 2),
-                          Text("|", style: TextStyle(color: Colors.grey)),
 
                           const SizedBox(width: 2),
 
@@ -142,7 +139,7 @@ class InspectionFirstScreen extends StatelessWidget {
                         hint: "unipole_height_hintText".tr,
                         icon: Icons.height,
                         controller: controller.heightController,
-
+                        keyboardType: TextInputType.number,
                         suffixWidget: Obx(
                           () => Container(
                             padding: const EdgeInsets.symmetric(
@@ -183,10 +180,7 @@ class InspectionFirstScreen extends StatelessWidget {
                           label: "ad_structure_size".tr,
                           hint: "ad_structure_size_hintText".tr,
                           icon: Icons.aspect_ratio,
-                          inputFormatters: [
-                            // SizeInputFormatter(controller.sizeUnit.value),
-                            SizeInputFormatter(),
-                          ],
+                          inputFormatters: [SizeInputFormatter()],
                           controller: controller.sizeController,
                           suffixWidget: Container(
                             padding: const EdgeInsets.symmetric(
@@ -240,12 +234,13 @@ class InspectionFirstScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            //      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Icon(
                                 Icons.calendar_today,
                                 color: Colors.red,
                               ),
+                              SizedBox(width: 17),
                               Text(
                                 controller.selectedDate.value.isEmpty
                                     ? "Null"
@@ -266,57 +261,44 @@ class InspectionFirstScreen extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: Obx(
-                              () => GestureDetector(
-                                onTap: controller.isFetchingLocation.value
-                                    ? null
-                                    : () => controller.fetchLocation(),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: controller.isFetchingLocation.value
+                            child: /*Obx(
+                              () => */ Container(
+                              decoration: BoxDecoration(
+                                color: /*controller.isFetchingLocation.value
+                                      ? Colors.red
+                                      : */
+                                    Colors.white,
+                                border: Border.all(
+                                  color: /* controller.isFetchingLocation.value
                                         ? Colors.red
-                                        : Colors.white,
-                                    border: Border.all(
-                                      color: controller.isFetchingLocation.value
-                                          ? Colors.red
-                                          : Colors.grey,
-                                      width: 1,
-                                    ),
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(12),
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.location_on),
-                                        SizedBox(width: 5),
-                                        Flexible(
-                                          child: Text(
-                                            controller.isFetchingLocation.value
-                                                ? "Fetching..."
-                                                : controller
-                                                      .isLocationFetched
-                                                      .value
-                                                ? "Location Fetched"
-                                                : "Fetch Location",
-                                            style: TextStyle(
-                                              color:
-                                                  controller
-                                                      .isFetchingLocation
-                                                      .value
-                                                  ? Colors.white
-                                                  : Colors.grey,
-                                            ),
-                                          ),
+                                        : */
+                                      Colors.grey,
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.location_on),
+                                    SizedBox(width: 2),
+                                    Flexible(
+                                      child: Text(
+                                        "Geo Location",
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.w500,
                                         ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                             ),
+                            /*),*/
                           ),
                           Expanded(
                             child: Padding(
@@ -412,10 +394,17 @@ class InspectionFirstScreen extends StatelessWidget {
                             onPressed: () {
                               controller.submitInspection();
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
+                            style:
+                                ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                ).copyWith(
+                                  overlayColor: MaterialStateProperty.all(
+                                    Colors.white.withOpacity(0.2),
+                                  ),
+                                ),
                             child: Text(
                               controller.isExistingInspection.value
                                   ? "Continue"
@@ -453,6 +442,7 @@ class InspectionFirstScreen extends StatelessWidget {
     VoidCallback? onTap,
     Widget? suffixWidget,
     List<SizeInputFormatter>? inputFormatters,
+    TextInputType? keyboardType,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -468,7 +458,6 @@ class InspectionFirstScreen extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
 
-            // const SizedBox(height: 4),
             if (suffixWidget != null) suffixWidget,
           ],
         ),
@@ -478,6 +467,7 @@ class InspectionFirstScreen extends StatelessWidget {
           readOnly: readOnly,
           onTap: onTap,
           inputFormatters: inputFormatters,
+          keyboardType: keyboardType,
           decoration: InputDecoration(
             prefixIcon: Icon(icon, color: Colors.red),
             hintText: hint,

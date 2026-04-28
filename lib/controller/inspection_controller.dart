@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
@@ -24,8 +25,10 @@ class InspectionController extends GetxController {
   var isLocationFetched = false.obs;
   var isExistingInspection = false.obs;
 
-  var latitude = '--'.obs;
-  var longitude = '--'.obs;
+  /*var latitude = '--'.obs;
+  var longitude = '--'.obs;*/
+  RxString latitude = "--".obs;
+  RxString longitude = "--".obs;
 
   @override
   void onInit() {
@@ -34,6 +37,8 @@ class InspectionController extends GetxController {
     visitedByController = TextEditingController();
     loadUser();
     loadInspectionData();
+    fetchLocation();
+    // initInspection();
     final now = DateTime.now();
     final formattedDate = DateFormat('dd MMMM yyyy').format(now);
 
@@ -134,7 +139,9 @@ class InspectionController extends GetxController {
     );
 
     if (result["success"]) {
-      AppSnackBar.showSuccess(result["message"]);
+      if (kDebugMode) {
+        print(result["message"]);
+      }
       Get.toNamed('/multiForm');
     } else {
       AppSnackBar.showError(result["message"]);
@@ -142,35 +149,107 @@ class InspectionController extends GetxController {
   }
 
   Future<void> loadInspectionData() async {
+    print("fehfuewa");
     final res = await apiService.getInspection();
-
+    print("API response received");
+    print(res);
     if (res.success && res.data != null) {
+      print("Data exists");
       isExistingInspection.value = true;
 
       final data = res.data;
+      print("Location: ${data.location}");
+      print("Height: ${data.unipoleHeight}");
+      print("Size: ${data.adStructureSize}");
+      print("Visited By: ${data.visitedBy}");
+      print("Date: ${data.visitingDate}");
+      print("Latitude: ${data.geoLocation.latitude}");
+      print("Longitude: ${data.geoLocation.longitude}");
 
       locationController.text = data.location;
+      print(locationController.text);
       heightController.text = data.unipoleHeight;
       sizeController.text = data.adStructureSize;
+      setHeightFromApi(data.unipoleHeight);
+      setSizeFromApi(data.adStructureSize);
       visitedByController.text = data.visitedBy;
 
       selectedDate.value = data.visitingDate;
-      latitude.value = data.geoLocation.latitude.toString();
-      longitude.value = data.geoLocation.longitude.toString();
+      /* latitude.value = data.geoLocation.latitude.toString();
+      longitude.value = data.geoLocation.longitude.toString();*/
+      latitude.value = data.geoLocation.latitude?.toString() ?? '--';
+      longitude.value = data.geoLocation.longitude?.toString() ?? '--';
 
       isLocationFetched.value = true;
     } else {
+      print("No inspection data");
       isExistingInspection.value = false;
     }
   }
 
-  @override
-  void onClose() {
-    /*  heightController.dispose();
-    sizeController.dispose();
-    dateController.dispose();
-    locationController.dispose();
-    visitedByController.dispose();*/
-    super.onClose();
+  /*Future<void> initInspection() async {
+    await loadInspectionData();
+
+    */ /*if (!isExistingInspection.value) {
+      fetchLocation();
+    }*/ /*
+    if (latitude.value == '--' || longitude.value == '--') {
+      await fetchLocation();
+    }
+  }*/
+  Future<void> initInspection() async {
+    if (kDebugMode) {
+      print("initInspection started");
+    }
+
+    await loadInspectionData();
+
+    if (kDebugMode) {
+      print("isExistingInspection: ${isExistingInspection.value}");
+    }
+    if (kDebugMode) {
+      print("latitude after API: ${latitude.value}");
+    }
+
+    if (!isExistingInspection.value || latitude.value == '--' || longitude.value == '--') {
+      if (kDebugMode) {
+        print("Fetching device location...");
+      }
+      await fetchLocation();
+    } else {
+      if (kDebugMode) {
+        print("Using API location");
+      }
+    }
+  }
+
+  void setHeightFromApi(String value) {
+    if (value.trim().isEmpty) return;
+
+    final parts = value.trim().split(" ");
+
+    // Example: "10 inch" or "10 ft ft"
+    heightController.text = parts.first;
+
+    if (parts.length > 1) {
+      heightUnit.value = parts.last.toLowerCase();
+    }
+  }
+
+  void setSizeFromApi(String value) {
+    if (value.trim().isEmpty) return;
+
+    final parts = value.trim().split(" ");
+
+    // Example: "10 X 40 FT"
+    if (parts.length >= 3) {
+      sizeController.text = "${parts[0]} ${parts[1]} ${parts[2]}";
+    } else {
+      sizeController.text = parts.first;
+    }
+
+    if (parts.length > 3) {
+      sizeUnit.value = parts.last.toLowerCase();
+    }
   }
 }

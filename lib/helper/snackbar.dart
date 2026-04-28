@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 class AppSnackBar {
@@ -41,6 +42,30 @@ class AppSnackBar {
       borderRadius: 10,
       duration: const Duration(seconds: 2),
       icon: const Icon(Icons.info, color: Colors.white),
+    );
+  }
+}
+
+class AppToast {
+  static void showSuccess(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.black,
+      textColor: Colors.white,
+      fontSize: 14,
+    );
+  }
+
+  static void showError(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.black,
+      textColor: Colors.white,
+      fontSize: 14,
     );
   }
 }

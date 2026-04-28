@@ -6,6 +6,7 @@ import 'package:unipole_inspection/app_translations.dart';
 import 'package:unipole_inspection/otp_screen.dart';
 import 'package:unipole_inspection/screens/inspection_first_screen.dart';
 import 'package:unipole_inspection/screens/inspection_screens/multi_step_form.dart';
+import 'package:unipole_inspection/screens/inspection_submit_screen.dart';
 import 'package:unipole_inspection/signup_screen.dart';
 import 'auth_service.dart';
 import 'binding/inspection_binding.dart';
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
           page: () => MultiStepForm(),
           binding: MultiFormBinding(),
         ),
+        GetPage(name: '/submitScreen', page: () => InspectionSubmitScreen()),
       ],
     );
   }

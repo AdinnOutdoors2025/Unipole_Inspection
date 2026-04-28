@@ -117,6 +117,9 @@ class _MultiStepFormState extends State<MultiStepForm> {
             stepHeader(),
             Expanded(
               child: Obx(() {
+                if (!controller.isInspectionLoaded.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
                 return Form(
                   key: formKeys[controller.currentStep.value],
                   child: stepBody(),
@@ -224,7 +227,19 @@ class _MultiStepFormState extends State<MultiStepForm> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: controller.prevStep,
-                  child: Text("back_button".tr),
+                  style:
+                      ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey.shade600,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ).copyWith(
+                        overlayColor: MaterialStateProperty.all(
+                          Colors.white.withOpacity(0.2),
+                        ),
+                      ),
+                  child: Text(
+                    "back_button".tr,
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             if (step > 0) const SizedBox(width: 10),
@@ -232,12 +247,27 @@ class _MultiStepFormState extends State<MultiStepForm> {
               child: ElevatedButton(
                 onPressed: () async {
                   if (step == 3) {
-                    await controller.openSelfieCameraAndSubmit();
+                    Get.toNamed('/submitScreen');
                   } else {
                     controller.nextStep(formKeys[step]);
                   }
                 },
-                child: Text(step == 3 ? "submit_button".tr : "next_button".tr),
+                style: /*ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),*/
+                    ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ).copyWith(
+                      overlayColor: MaterialStateProperty.all(
+                        Colors.white.withOpacity(0.2), // press effect
+                      ),
+                    ),
+                child: Text(
+                  "next_button".tr,
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ],

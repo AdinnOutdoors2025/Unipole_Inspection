@@ -9,6 +9,7 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:unipole_inspection/widgets/video_preview.dart';
 import 'package:video_compress/video_compress.dart';
+import 'package:video_player/video_player.dart';
 import '../../config/app_config.dart';
 import '../../controller/multi_form_controller.dart';
 
@@ -144,6 +145,7 @@ class _QuestionItemState extends State<QuestionItem> {
                       decoration: InputDecoration(
                         hintText: "Write issue details",
                         border: InputBorder.none,
+                        hintStyle: TextStyle(fontSize: 15),
                       ),
                       controller: widget.controller,
                     ),
@@ -151,6 +153,9 @@ class _QuestionItemState extends State<QuestionItem> {
                     Obx(() {
                       final mediaList =
                           c.mediaPerQuestion[widget.widgetIndex] ?? [];
+                      final isUploading = mediaList.any(
+                        (e) => e.isLoading == true,
+                      );
 
                       if (mediaList.isNotEmpty) {
                         return Row(
@@ -160,9 +165,12 @@ class _QuestionItemState extends State<QuestionItem> {
                                 height: 60,
                                 child: ListView.builder(
                                   scrollDirection: Axis.horizontal,
-                                  itemCount: mediaList.length + 1,
+                                  itemCount: isUploading
+                                      ? mediaList.length
+                                      : mediaList.length + 1,
                                   itemBuilder: (context, index) {
-                                    if (index == mediaList.length) {
+                                    if (!isUploading &&
+                                        index == mediaList.length) {
                                       return GestureDetector(
                                         onTap: () => showPickerDialog(
                                           widget.widgetIndex,
@@ -197,7 +205,7 @@ class _QuestionItemState extends State<QuestionItem> {
                                         padding: const EdgeInsets.only(
                                           right: 8,
                                         ),
-                                        child: /*Stack(
+                                        child: Stack(
                                           children: [
                                             Container(
                                               height: 70,
@@ -208,20 +216,9 @@ class _QuestionItemState extends State<QuestionItem> {
                                                 color: Colors.black12,
                                               ),
                                               child: item.isVideo
-                                                  ? Stack(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      children: const [
-                                                        Icon(
-                                                          Icons.videocam,
-                                                          color: Colors.white,
-                                                        ),
-                                                        Icon(
-                                                          Icons
-                                                              .play_circle_fill,
-                                                          size: 22,
-                                                        ),
-                                                      ],
+                                                  ? VideoThumb(
+                                                      file: item.file,
+                                                      url: item.url,
                                                     )
                                                   : ClipRRect(
                                                       borderRadius:
@@ -234,82 +231,54 @@ class _QuestionItemState extends State<QuestionItem> {
                                                               fit: BoxFit.cover,
                                                             )
                                                           : item.url != null
-                                                          ? Image.network(
+                                                          ? /*Image.network(
                                                               item.url!,
                                                               fit: BoxFit.cover,
+                                                            )*/ Image.network(
+                                                              item.url!,
+                                                              fit: BoxFit.cover,
+                                                              loadingBuilder:
+                                                                  (
+                                                                    context,
+                                                                    child,
+                                                                    progress,
+                                                                  ) {
+                                                                    if (progress ==
+                                                                        null)
+                                                                      return child;
+                                                                    return const Center(
+                                                                      child: SizedBox(
+                                                                        height:
+                                                                            16,
+                                                                        width:
+                                                                            16,
+                                                                        child: CircularProgressIndicator(
+                                                                          strokeWidth:
+                                                                              2,
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                              errorBuilder:
+                                                                  (
+                                                                    context,
+                                                                    error,
+                                                                    stackTrace,
+                                                                  ) {
+                                                                    return const Center(
+                                                                      child: Icon(
+                                                                        Icons
+                                                                            .broken_image,
+                                                                        size:
+                                                                            18,
+                                                                      ),
+                                                                    );
+                                                                  },
                                                             )
                                                           : const SizedBox(),
                                                     ),
                                             ),
 
-                                            Positioned(
-                                              right: 2,
-                                              top: 2,
-                                              child: GestureDetector(
-                                                onTap: () => c.removeMedia(
-                                                  widget.widgetIndex,
-                                                  index,
-                                                ),
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                  child: const Icon(
-                                                    Icons.close,
-                                                    color: Colors.red,
-                                                    size: 12,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),*/ Stack(
-                                          children: [
-                                            Container(
-                                              height: 70,
-                                              width: 60,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                                color: Colors.black12,
-                                              ),
-                                              child: item.isVideo
-                                                  ? Stack(
-                                                      alignment:
-                                                          Alignment.center,
-                                                      children: const [
-                                                        Icon(
-                                                          Icons.videocam,
-                                                          color: Colors.white,
-                                                        ),
-                                                        Icon(
-                                                          Icons
-                                                              .play_circle_fill,
-                                                          size: 22,
-                                                        ),
-                                                      ],
-                                                    )
-                                                  : ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            6,
-                                                          ),
-                                                      child: item.file != null
-                                                          ? Image.file(
-                                                              item.file!,
-                                                              fit: BoxFit.cover,
-                                                            )
-                                                          : item.url != null
-                                                          ? Image.network(
-                                                              item.url!,
-                                                              fit: BoxFit.cover,
-                                                            )
-                                                          : const SizedBox(),
-                                                    ),
-                                            ),
-
-                                            /// ✅ LOADING OVERLAY
                                             if (item.isLoading)
                                               Positioned.fill(
                                                 child: Container(
@@ -334,7 +303,6 @@ class _QuestionItemState extends State<QuestionItem> {
                                                 ),
                                               ),
 
-                                            /// DELETE BUTTON
                                             Positioned(
                                               right: 2,
                                               top: 2,
@@ -507,46 +475,43 @@ class _QuestionItemState extends State<QuestionItem> {
                       maxScale: 4,
                       child: Center(
                         child: item.file != null
-                            ? Image.file(item.file!, fit: BoxFit.cover)
+                            ? Image.file(
+                                item.file!,
+                                key: ValueKey(item.file!.path),
+                                fit: BoxFit.cover,
+                              )
                             : item.url != null
-                            ? Image.network(item.url!, fit: BoxFit.cover)
+                            ? /*Image.network(
+                                item.url!,
+                                key: ValueKey(item.url),
+                                fit: BoxFit.cover,
+                              )*/ Image.network(
+                                item.url!,
+                                key: ValueKey(item.url),
+                                fit: BoxFit.cover,
+
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+
+                                      return const Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    },
+
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Center(
+                                    child: Icon(
+                                      Icons.broken_image,
+                                      color: Colors.white,
+                                    ),
+                                  );
+                                },
+                              )
                             : const SizedBox(),
                       ),
                     );
                   },
-                ),
-
-                bottomNavigationBar: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  color: Colors.black.withOpacity(0.6),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Swipe to view",
-                        style: TextStyle(color: Colors.white70),
-                      ),
-
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        onPressed: () async {
-                          await c.retake(qIndex, currentIndex);
-                          setDialogState(() {});
-                        },
-                        icon: const Icon(Icons.camera_alt),
-                        label: const Text("Retake"),
-                      ),
-                    ],
-                  ),
                 ),
               );
             },
@@ -620,6 +585,84 @@ class _QuestionItemState extends State<QuestionItem> {
           ),
         );
       },
+    );
+  }
+}
+
+class VideoThumb extends StatefulWidget {
+  final File? file;
+  final String? url;
+
+  const VideoThumb({super.key, this.file, this.url});
+
+  @override
+  State<VideoThumb> createState() => _VideoThumbState();
+}
+
+class _VideoThumbState extends State<VideoThumb> {
+  VideoPlayerController? controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.file != null) {
+      controller = VideoPlayerController.file(widget.file!);
+    } else if (widget.url != null && widget.url!.isNotEmpty) {
+      controller = VideoPlayerController.networkUrl(Uri.parse(widget.url!));
+    }
+
+    controller?.initialize().then((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (controller == null || !controller!.value.isInitialized) {
+      return Container(
+        height: 70,
+        width: 60,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          color: Colors.black12,
+        ),
+        child: const Center(
+          child: SizedBox(
+            height: 16,
+            width: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: SizedBox(
+            height: 70,
+            width: 60,
+            child: FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: controller!.value.size.width,
+                height: controller!.value.size.height,
+                child: VideoPlayer(controller!),
+              ),
+            ),
+          ),
+        ),
+        const Icon(Icons.play_circle_fill, color: Colors.white, size: 22),
+      ],
     );
   }
 }
