@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../auth_service.dart';
 import '../controller/inspection_controller.dart';
 import '../widgets/size_Input_formatter.dart';
 import 'inspection_screens/multi_step_form.dart';
 
 class InspectionFirstScreen extends StatelessWidget {
-  InspectionFirstScreen({super.key});
+  const InspectionFirstScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,10 @@ class InspectionFirstScreen extends StatelessWidget {
                       child: Row(
                         children: [
                           GestureDetector(
-                            onTap: () {
+                            onTap: () async {
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setString('lang', 'ta');
                               Get.updateLocale(const Locale('ta', 'IN'));
                             },
                             child: Container(
@@ -66,7 +70,11 @@ class InspectionFirstScreen extends StatelessWidget {
                           const SizedBox(width: 2),
 
                           GestureDetector(
-                            onTap: () {
+                            onTap: () async {
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setString('lang', 'en');
+
                               Get.updateLocale(const Locale('en', 'US'));
                             },
                             child: Container(
@@ -234,71 +242,44 @@ class InspectionFirstScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
-                            //      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Icon(
                                 Icons.calendar_today,
                                 color: Colors.red,
                               ),
                               SizedBox(width: 17),
-                              Text(
-                                controller.selectedDate.value.isEmpty
-                                    ? "Null"
-                                    : controller.selectedDate.value,
-                              ),
+                              Text(controller.selectedDate.value),
                             ],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       buildTextField(
-                        label: "Location",
+                        label: "location".tr,
                         icon: Icons.location_on_rounded,
                         controller: controller.locationController,
-                        hint: "Enter address",
+                        hint: "address_hintText".tr,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
-                          Expanded(
-                            child: /*Obx(
-                              () => */ Container(
-                              decoration: BoxDecoration(
-                                color: /*controller.isFetchingLocation.value
-                                      ? Colors.red
-                                      : */
-                                    Colors.white,
-                                border: Border.all(
-                                  color: /* controller.isFetchingLocation.value
-                                        ? Colors.red
-                                        : */
-                                      Colors.grey,
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(12),
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.location_on),
-                                    SizedBox(width: 2),
-                                    Flexible(
-                                      child: Text(
-                                        "Geo Location",
-                                        style: TextStyle(
-                                          color: Colors.red,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: Colors.grey, width: 1),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
                               ),
                             ),
-                            /*),*/
+                            child: Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.location_on),
+                                  SizedBox(width: 1),
+                                ],
+                              ),
+                            ),
                           ),
                           Expanded(
                             child: Padding(
@@ -402,12 +383,12 @@ class InspectionFirstScreen extends StatelessWidget {
                                   ),
                                 ).copyWith(
                                   overlayColor: MaterialStateProperty.all(
-                                    Colors.white.withOpacity(0.2),
+                                    Colors.white.withOpacity(0.5),
                                   ),
                                 ),
                             child: Text(
                               controller.isExistingInspection.value
-                                  ? "Continue"
+                                  ? "continue_button".tr
                                   : "next_button".tr,
 
                               style: TextStyle(color: Colors.white),

@@ -1,10 +1,28 @@
 {
   "welcome_back": "Welcome Back!",
-  "employee_id/username_hintText": "Employee ID / Username",
+  "employee_number": "Enter phone Number",
   "password_hintText": "Password",
   "login_button": "Login",
   "sign_up_button": "Sign Up",
   "do_not_have_account": "Don't have an account? ",
+
+  "enter_name_hintText" : "Enter name",
+  "enter_password_hintText": "Enter Password",
+  "enter_confirm_password_hintText": "Enter confirm password",
+  "already_have_an_account": "Already have an account? ",
+  "verification_code": "we sent a 6-digit verification code to",
+  "enter_code_text": "Please enter it below.",
+  "resent_otp_text": "Resend OTP",
+  "resent_otp_in_text": "Resend OTP in",
+
+  "required_field": "@field required",
+  "phone_number_login_validation": "Employee phone number is required",
+  "password_login_validation": "Password is required",
+  "name_validation": "Name",
+  "phone_number_validation": "phone number",
+  "password_validation": "password",
+  "confirm_password_validation": "Confirm password required",
+  "password_do_notmatch_validation": "Passwords do not match",
 
   "inspection_first_screen_title": "Fill Inspection Details",
   "inspection_first_screen_subtitle": "Enter unipole details to start inspection",
@@ -18,11 +36,14 @@
   "inch": "inch",
   "cm": "cm",
   "next_button": "Next",
+  "continue_button": "Continue",
   "back_button": "Back",
   "submit_button": "Submit",
   "yes" : "Yes",
   "no" : "No",
   "geo_location" : "Geo Location",
+  "location" : "Location",
+  "address_hintText" : "Enter address",
 
   "foundation_form_title" : "Foundation",
   "post_form_title" : "Post",
@@ -73,6 +94,11 @@
   "safety_form_s4": "4. Is there any wind damage?",
   "safety_form_s5": "5. Is there any rain damage?",
   "safety_form_s6": "6. Are there any unauthorized modifications?",
-  "safety_form_s7": "7. Have repairs been carried out properly?"
+  "safety_form_s7": "7. Have repairs been carried out properly?",
 
+  "final_step": "Final Step",
+  "selfie_to_complete": "Take a selfie to complete inspection ",
+  "take_selfie": "Take Selfie",
+  "retake": "Retake",
+  "submit_inspection": "Submit Inspection"
 }

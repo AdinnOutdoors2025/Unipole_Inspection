@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:unipole_inspection/auth_service.dart';
@@ -27,6 +28,7 @@ class MultiFormController extends GetxController {
   var isExistingInspection = false.obs;
   var isPrefilling = false;
   int maxMediaCount = 7;
+  var isSubmitting = false.obs;
 
   @override
   void onInit() {
@@ -57,7 +59,6 @@ class MultiFormController extends GetxController {
     }
 
     final key = questionKeys[index];
-    final mediaList = getMediaList(index);
 
     final files = singleFile != null
         ? [singleFile]
@@ -97,10 +98,16 @@ class MultiFormController extends GetxController {
     }
 
     if (!stepCompleted[index - 1]) {
-      AppSnackBar.showError("Complete previous step first");
+      Fluttertoast.showToast(
+        msg: "Complete previous step first",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 14,
+      );
       return;
     }
-
     currentStep.value = index;
   }
 
@@ -118,6 +125,15 @@ class MultiFormController extends GetxController {
     if (currentStep.value > 0) {
       currentStep.value--;
     }
+  }
+
+  bool get isAnyUploading {
+    for (var list in mediaPerQuestion.values) {
+      if (list.any((e) => e.isLoading == true)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> pickImage(int qIndex) async {
@@ -488,21 +504,30 @@ class MultiFormController extends GetxController {
   }
 
   Future<void> submitInspection(File image) async {
-    final storage = const FlutterSecureStorage();
-    final inspectionId = await storage.read(key: "inspection_id");
+    if (isSubmitting.value) return;
+    isSubmitting.value = true;
 
-    if (inspectionId == null) return;
+    try {
+      final storage = const FlutterSecureStorage();
+      final inspectionId = await storage.read(key: "inspection_id");
 
-    final result = await AuthService().submitInspection(
-      inspectionId: inspectionId,
-      file: image,
-    );
+      if (inspectionId == null) return;
 
-    /* handleResult(result);*/
-    if (result["success"]) {
-      AppToast.showSuccess(result["message"]);
-    } else {
-      AppToast.showError(result["message"]);
+      final result = await AuthService().submitInspection(
+        inspectionId: inspectionId,
+        file: image,
+      );
+
+      if (result["success"]) {
+        AppToast.showSuccess(result["message"]);
+        Get.offAllNamed('/inspection');
+      } else {
+        AppToast.showError(result["message"]);
+      }
+    } catch (e) {
+      AppToast.showError("Something went wrong");
+    } finally {
+      isSubmitting.value = false;
     }
   }
 }

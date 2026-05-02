@@ -123,7 +123,6 @@ class _QuestionItemState extends State<QuestionItem> {
             ],
           );
         }),
-
         const SizedBox(height: 10),
         Obx(() {
           final isYesSelected = c.getAnswer(widget.widgetIndex);
@@ -231,10 +230,7 @@ class _QuestionItemState extends State<QuestionItem> {
                                                               fit: BoxFit.cover,
                                                             )
                                                           : item.url != null
-                                                          ? /*Image.network(
-                                                              item.url!,
-                                                              fit: BoxFit.cover,
-                                                            )*/ Image.network(
+                                                          ? Image.network(
                                                               item.url!,
                                                               fit: BoxFit.cover,
                                                               loadingBuilder:
@@ -338,14 +334,26 @@ class _QuestionItemState extends State<QuestionItem> {
                       } else {
                         return Row(
                           children: [
-                            GestureDetector(
-                              onTap: () => c.pickImage(widget.widgetIndex),
-                              child: buildBtn("Image"),
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () {
+                                  c.pickImage(widget.widgetIndex);
+                                },
+                                child: buildBtn("Image"),
+                              ),
                             ),
                             const SizedBox(width: 5),
-                            GestureDetector(
-                              onTap: () => c.pickVideo(widget.widgetIndex),
-                              child: buildBtn("Video"),
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () {
+                                  c.pickVideo(widget.widgetIndex);
+                                },
+                                child: buildBtn("Video"),
+                              ),
                             ),
                           ],
                         );
@@ -360,16 +368,6 @@ class _QuestionItemState extends State<QuestionItem> {
 
                       return Row(
                         children: const [
-                          Text(
-                            "• Live Camera Only",
-                            style: TextStyle(fontSize: 11),
-                          ),
-                          SizedBox(width: 5),
-                          Text(
-                            "• No gallery Upload",
-                            style: TextStyle(fontSize: 11),
-                          ),
-                          SizedBox(width: 5),
                           Text(
                             "• Maximum 7 files",
                             style: TextStyle(fontSize: 11),
@@ -389,18 +387,20 @@ class _QuestionItemState extends State<QuestionItem> {
   }
 
   Widget buildBtn(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    return Ink(
       decoration: BoxDecoration(
         color: Colors.grey.shade300,
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.camera_alt, size: 18),
-          const SizedBox(width: 5),
-          Text(text),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(
+          children: [
+            const Icon(Icons.camera_alt, size: 18),
+            const SizedBox(width: 5),
+            Text(text),
+          ],
+        ),
       ),
     );
   }
@@ -481,11 +481,7 @@ class _QuestionItemState extends State<QuestionItem> {
                                 fit: BoxFit.cover,
                               )
                             : item.url != null
-                            ? /*Image.network(
-                                item.url!,
-                                key: ValueKey(item.url),
-                                fit: BoxFit.cover,
-                              )*/ Image.network(
+                            ? Image.network(
                                 item.url!,
                                 key: ValueKey(item.url),
                                 fit: BoxFit.cover,
@@ -544,31 +540,54 @@ class _QuestionItemState extends State<QuestionItem> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        c.pickImage(qIndex);
-                      },
-                      child: Column(
-                        children: const [
-                          Icon(Icons.camera_alt, size: 40),
-                          SizedBox(height: 5),
-                          Text("Image"),
-                        ],
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          Navigator.pop(context);
+                          c.pickImage(qIndex);
+                        },
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              children: const [
+                                Icon(Icons.camera_alt, size: 40),
+                                SizedBox(height: 5),
+                                Text("Image"),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        c.pickVideo(qIndex);
-                      },
-                      child: Column(
-                        children: const [
-                          Icon(Icons.videocam, size: 40),
-                          SizedBox(height: 5),
-                          Text("Video"),
-                        ],
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          Navigator.pop(context);
+                          c.pickVideo(qIndex);
+                        },
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              children: const [
+                                Icon(Icons.videocam, size: 40),
+                                SizedBox(height: 5),
+                                Text("Video"),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],

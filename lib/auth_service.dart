@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:unipole_inspection/model/dashboard_model.dart';
 import 'package:unipole_inspection/service/api_constants.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
@@ -43,6 +44,7 @@ class AuthService {
 
       if (token != null && token.toString().isNotEmpty) {
         await _storage.write(key: _tokenKey, value: token);
+        await _storage.write(key: "isAdmin", value: user['isAdmin'].toString());
       }
       if (user != null) {
         await _storage.write(key: "userName", value: user['name']);
@@ -320,14 +322,14 @@ class AuthService {
 
     request.headers['Authorization'] = "Bearer $token";
 
-     request.files.add(
+    request.files.add(
       await http.MultipartFile.fromPath(
         'selfie_image',
         fixedFile.path,
         contentType: MediaType('image', 'jpeg'),
       ),
     );
-   /* final avifFile = await convertToAvif(file);
+    /* final avifFile = await convertToAvif(file);
 
     request.files.add(
       await http.MultipartFile.fromPath(
@@ -341,6 +343,20 @@ class AuthService {
     var responseBody = await response.stream.bytesToString();
 
     return jsonDecode(responseBody);
+  }
+
+  //DashBoard
+  Future<DashboardModel> getDashBoard() async {
+    final token = await getToken();
+
+    final response = await http.get(
+      Uri.parse("${ApiConstants.baseUrl}${ApiConstants.getDashBoard}"),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    final json = jsonDecode(response.body);
+
+    return DashboardModel.fromJson(json);
   }
 
   Future<String?> getToken() async {
@@ -382,7 +398,7 @@ class AuthService {
     return JwtDecoder.decode(token);
   }
 
- /* Future<File> convertToAvif(File inputFile) async {
+  /* Future<File> convertToAvif(File inputFile) async {
     final outputPath =
         "${inputFile.parent.path}/${DateTime.now().millisecondsSinceEpoch}.avif";
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:unipole_inspection/screens/inspection_screens/question_item.dart';
 import '../../controller/multi_form_controller.dart';
+import '../../widgets/video_loader.dart';
 
 final List<String> step1Questions = [
   "foundation_form_f1",
@@ -117,8 +118,11 @@ class _MultiStepFormState extends State<MultiStepForm> {
             stepHeader(),
             Expanded(
               child: Obx(() {
-                if (!controller.isInspectionLoaded.value) {
+                /* if (!controller.isInspectionLoaded.value) {
                   return const Center(child: CircularProgressIndicator());
+                }*/
+                if (!controller.isInspectionLoaded.value) {
+                  return VideoLoader();
                 }
                 return Form(
                   key: formKeys[controller.currentStep.value],
@@ -219,6 +223,9 @@ class _MultiStepFormState extends State<MultiStepForm> {
     return Obx(() {
       int step = controller.currentStep.value;
 
+      if (controller.isAnyUploading) {
+        return const SizedBox();
+      }
       return Padding(
         padding: const EdgeInsets.only(top: 10),
         child: Row(
@@ -233,7 +240,7 @@ class _MultiStepFormState extends State<MultiStepForm> {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ).copyWith(
                         overlayColor: MaterialStateProperty.all(
-                          Colors.white.withOpacity(0.2),
+                          Colors.white.withOpacity(0.5),
                         ),
                       ),
                   child: Text(
@@ -252,16 +259,13 @@ class _MultiStepFormState extends State<MultiStepForm> {
                     controller.nextStep(formKeys[step]);
                   }
                 },
-                style: /*ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),*/
+                style:
                     ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ).copyWith(
                       overlayColor: MaterialStateProperty.all(
-                        Colors.white.withOpacity(0.2), // press effect
+                        Colors.white.withOpacity(0.5),
                       ),
                     ),
                 child: Text(

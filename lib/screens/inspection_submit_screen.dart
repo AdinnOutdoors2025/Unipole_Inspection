@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import '../controller/multi_form_controller.dart';
 
 class InspectionSubmitScreen extends StatefulWidget {
@@ -46,16 +48,22 @@ class _InspectionSubmitScreenState extends State<InspectionSubmitScreen> {
 
             const SizedBox(height: 20),
 
-            const Text(
-              "Final Step",
+            Text(
+              "final_step".tr,
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 8),
 
-            const Text(
-              "Take a selfie to complete inspection",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "selfie_to_complete".tr,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400),
+                ),
+                Icon(Icons.photo_camera_rounded, size: 20),
+              ],
             ),
 
             const SizedBox(height: 30),
@@ -107,33 +115,50 @@ class _InspectionSubmitScreenState extends State<InspectionSubmitScreen> {
                         });
                       }
                     },
-                    /*  style:
+                    style:
                         ElevatedButton.styleFrom(
                           backgroundColor: Colors.grey.shade400,
                         ).copyWith(
                           overlayColor: MaterialStateProperty.all(
-                            Colors.white.withOpacity(0.2),
+                            Colors.white.withOpacity(0.5),
                           ),
-                        ),*/
+                        ),
                     icon: const Icon(Icons.camera_alt),
                     label: Text(
-                      selfie == null ? "Take Selfie" : "Retake",
+                      selfie == null ? "take_selfie".tr : "retake".tr,
                       style: TextStyle(),
                     ),
                   ),
 
                   const SizedBox(height: 10),
 
-                  ElevatedButton(
-                    onPressed: selfie == null
-                        ? null
-                        : () async {
-                            await c.submitInspection(selfie!);
-
-                            Get.offAllNamed('/inspection');
-                          },
-                    child: const Text("Submit Inspection"),
-                  ),
+                  Obx(() {
+                    return ElevatedButton(
+                      onPressed: (selfie == null || c.isSubmitting.value)
+                          ? null
+                          : () {
+                              c.submitInspection(selfie!);
+                            },
+                      style:
+                          ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey.shade400,
+                          ).copyWith(
+                            overlayColor: MaterialStateProperty.all(
+                              Colors.white.withOpacity(0.5),
+                            ),
+                          ),
+                      child: c.isSubmitting.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text("submit_inspection".tr),
+                    );
+                  }),
                 ],
               ),
             ),

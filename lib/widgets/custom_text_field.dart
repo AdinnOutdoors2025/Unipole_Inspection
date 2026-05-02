@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
+
   //final FocusNode focusNode;
   final String hintText;
   final IconData? prefixIcon;
@@ -12,6 +14,8 @@ class CustomTextField extends StatelessWidget {
   final ValueChanged<String>? onFieldSubmitted;
   final Widget? suffix;
   final double height;
+  final double? hintTextSize;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     super.key,
@@ -26,6 +30,8 @@ class CustomTextField extends StatelessWidget {
     this.textInputAction,
     this.onFieldSubmitted,
     this.suffix,
+    this.hintTextSize,
+    this.inputFormatters,
   });
 
   @override
@@ -44,11 +50,12 @@ class CustomTextField extends StatelessWidget {
         fontSize: 17,
         fontWeight: FontWeight.w500,
       ),
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(
+        hintStyle: TextStyle(
           color: Color(0xFF6A6C76),
-          fontSize: 17,
+          fontSize: hintTextSize,
           fontWeight: FontWeight.w500,
         ),
         errorStyle: const TextStyle(

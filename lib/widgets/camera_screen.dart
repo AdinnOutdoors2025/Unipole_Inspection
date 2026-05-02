@@ -16,49 +16,73 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  late CameraController controller;
+  CameraController? controller;
   List<CameraDescription> cameras = [];
   int currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    initCamera(widget.camera);
+    init();
+  }
+
+  Future<void> init() async {
+    cameras = await availableCameras();
+
+    currentIndex = cameras.indexWhere(
+      (cam) => cam.lensDirection == widget.camera.lensDirection,
+    );
+
+    if (currentIndex == -1) currentIndex = 0;
+
+    await initCamera(cameras[currentIndex]);
   }
 
   Future<void> initCamera(CameraDescription cam) async {
-    controller = CameraController(cam, ResolutionPreset.medium);
-    await controller.initialize();
-    setState(() {});
+    final newController = CameraController(cam, ResolutionPreset.medium);
+    await newController.initialize();
+    if (!mounted) return;
+
+    setState(() {
+      controller = newController;
+    });
   }
 
   Future<void> switchCamera() async {
-    cameras = await availableCameras();
-
+    if (cameras.isEmpty) return;
     currentIndex = (currentIndex + 1) % cameras.length;
 
-    await controller.dispose();
+    await controller?.dispose();
     await initCamera(cameras[currentIndex]);
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!controller.value.isInitialized) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (controller == null || !controller!.value.isInitialized) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
-          CameraPreview(controller),
-
-          /// 🔁 Flip button
+          Center(child: CameraPreview(controller!)),
+          Positioned(
+            top: 40,
+            left: 20,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Get.back(),
+            ),
+          ),
           Positioned(
             top: 40,
             right: 20,
@@ -67,8 +91,6 @@ class _CameraScreenState extends State<CameraScreen> {
               onPressed: switchCamera,
             ),
           ),
-
-          /// 📸 Capture button
           Positioned(
             bottom: 30,
             left: 0,
@@ -76,8 +98,9 @@ class _CameraScreenState extends State<CameraScreen> {
             child: Center(
               child: GestureDetector(
                 onTap: () async {
-                  final file = await controller.takePicture();
-                  Get.back(result: File(file.path));
+                  if (controller == null || !controller!.value.isInitialized) return;
+                  final file = await controller?.takePicture();
+                  Get.back(result: File(file!.path));
                 },
                 child: const CircleAvatar(
                   radius: 30,

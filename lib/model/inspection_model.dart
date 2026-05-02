@@ -27,18 +27,18 @@ class Data {
   String id;
   String userId;
   String inspectionId;
-  String location;
+  String? location;
   GeoLocation geoLocation;
   String unipoleHeight;
   String adStructureSize;
   String visitingDate;
-  String visitedBy;
+  String? visitedBy;
   dynamic selfieImage;
   int inspectionStatus;
   String inspectionFlag;
   InspectionMetrics inspectionMetrics;
-  DateTime createdAt;
-  DateTime updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
   int v;
   Foundation foundation;
   Post post;
@@ -68,33 +68,36 @@ class Data {
     required this.generalInspection,
   });
 
+
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-    id: json["_id"],
-    userId: json["user_id"],
-    inspectionId: json["inspection_id"],
+    id: json["_id"] ?? "",
+    userId: json["user_id"] ?? "",
+    inspectionId: json["inspection_id"] ?? "",
     location: json["location"],
-    geoLocation: GeoLocation.fromJson(json["geo_location"]),
-    unipoleHeight: json["unipole_height"],
-    adStructureSize: json["ad_structure_size"],
-    visitingDate: json["visiting_date"],
+    geoLocation: GeoLocation.fromJson(json["geo_location"] ?? {}),
+    unipoleHeight: json["unipole_height"] ?? "",
+    adStructureSize: json["ad_structure_size"] ?? "",
+    visitingDate: json["visiting_date"] ?? "",
     visitedBy: json["visited_by"],
     selfieImage: json["selfie_image"],
-    inspectionStatus: json["inspection_status"],
-    inspectionFlag: json["inspection_flag"],
-    inspectionMetrics: InspectionMetrics.fromJson(json["inspection_metrics"]),
-    createdAt: DateTime.parse(json["createdAt"]),
-    updatedAt: DateTime.parse(json["updatedAt"]),
-    v: json["__v"],
-    foundation: Foundation.fromJson(json["foundation"]),
-    /*post: Map.from(json["post"]).map(
-      (k, v) => MapEntry<String, AnglePipeMembersStrong>(
-        k,
-        AnglePipeMembersStrong.fromJson(v),
-      ),
-    ),*/
-    post: Post.fromJson(json["post"]),
-    adBoardFrame: AdBoardFrame.fromJson(json["ad_board_frame"]),
-    generalInspection: GeneralInspection.fromJson(json["general_inspection"]),
+    inspectionStatus: json["inspection_status"] ?? 0,
+    inspectionFlag: json["inspection_flag"] ?? "",
+    inspectionMetrics: InspectionMetrics.fromJson(
+      json["inspection_metrics"] ?? {},
+    ),
+    createdAt: json["createdAt"] != null
+        ? DateTime.parse(json["createdAt"])
+        : null,
+    updatedAt: json["updatedAt"] != null
+        ? DateTime.parse(json["updatedAt"])
+        : null,
+    v: json["__v"] ?? 0,
+    foundation: Foundation.fromJson(json["foundation"] ?? {}),
+    post: Post.fromJson(json["post"] ?? {}),
+    adBoardFrame: AdBoardFrame.fromJson(json["ad_board_frame"] ?? {}),
+    generalInspection: GeneralInspection.fromJson(
+      json["general_inspection"] ?? {},
+    ),
   );
 
   Map<String, dynamic> toJson() => {
@@ -111,13 +114,10 @@ class Data {
     "inspection_status": inspectionStatus,
     "inspection_flag": inspectionFlag,
     "inspection_metrics": inspectionMetrics.toJson(),
-    "createdAt": createdAt.toIso8601String(),
-    "updatedAt": updatedAt.toIso8601String(),
+    "createdAt": createdAt?.toIso8601String(),
+    "updatedAt": updatedAt?.toIso8601String(),
     "__v": v,
     "foundation": foundation.toJson(),
-    /* "post": Map.from(
-      post,
-    ).map((k, v) => MapEntry<String, dynamic>(k, v.toJson())),*/
     "post": post.toJson(),
     "ad_board_frame": adBoardFrame.toJson(),
     "general_inspection": generalInspection.toJson(),
@@ -150,27 +150,29 @@ class AdBoardFrame {
   });
 
   factory AdBoardFrame.fromJson(Map<String, dynamic> json) => AdBoardFrame(
-    frameStraight: AnglePipeMembersStrong.fromJson(json["frame_straight"]),
-    bendInFrame: AnglePipeMembersStrong.fromJson(json["bend_in_frame"]),
+    frameStraight: AnglePipeMembersStrong.fromJson(
+      json["frame_straight"] ?? {},
+    ),
+    bendInFrame: AnglePipeMembersStrong.fromJson(json["bend_in_frame"] ?? {}),
     anglePipeMembersStrong: AnglePipeMembersStrong.fromJson(
-      json["angle_pipe_members_strong"],
+      json["angle_pipe_members_strong"] ?? {},
     ),
     weldedJointsStrong: AnglePipeMembersStrong.fromJson(
-      json["welded_joints_strong"],
+      json["welded_joints_strong"] ?? {},
     ),
     flexProperlyFixed: AnglePipeMembersStrong.fromJson(
-      json["flex_properly_fixed"],
+      json["flex_properly_fixed"] ?? {},
     ),
-    flexLoose: AnglePipeMembersStrong.fromJson(json["flex_loose"]),
-    clampsTight: AnglePipeMembersStrong.fromJson(json["clamps_tight"]),
+    flexLoose: AnglePipeMembersStrong.fromJson(json["flex_loose"] ?? {}),
+    clampsTight: AnglePipeMembersStrong.fromJson(json["clamps_tight"] ?? {}),
     supportFastenersLooseness: AnglePipeMembersStrong.fromJson(
-      json["support_fasteners_looseness"],
+      json["support_fasteners_looseness"] ?? {},
     ),
     vibrationDueToWind: AnglePipeMembersStrong.fromJson(
-      json["vibration_due_to_wind"],
+      json["vibration_due_to_wind"] ?? {},
     ),
     waterRunoffOrSeepageOnStructure: AnglePipeMembersStrong.fromJson(
-      json["water_runoff_or_seepage_on_structure"],
+      json["water_runoff_or_seepage_on_structure"] ?? {},
     ),
   );
 
@@ -197,8 +199,10 @@ class AnglePipeMembersStrong {
 
   factory AnglePipeMembersStrong.fromJson(Map<String, dynamic> json) =>
       AnglePipeMembersStrong(
-        status: json["status"],
-        images: List<String>.from(json["images"].map((x) => x)),
+        status: json["status"] ?? false,
+        images: json["images"] == null
+            ? []
+            : List<String>.from(json["images"].map((x) => x)),
       );
 
   Map<String, dynamic> toJson() => {
@@ -235,30 +239,38 @@ class Foundation {
   });
 
   factory Foundation.fromJson(Map<String, dynamic> json) => Foundation(
-    concreteCracks: AnglePipeMembersStrong.fromJson(json["concrete_cracks"]),
-    soilErosionAtFoundation: AnglePipeMembersStrong.fromJson(
-      json["soil_erosion_at_foundation"],
+    concreteCracks: AnglePipeMembersStrong.fromJson(
+      json["concrete_cracks"] ?? {},
     ),
-    waterStagnation: AnglePipeMembersStrong.fromJson(json["water_stagnation"]),
+    soilErosionAtFoundation: AnglePipeMembersStrong.fromJson(
+      json["soil_erosion_at_foundation"] ?? {},
+    ),
+    waterStagnation: AnglePipeMembersStrong.fromJson(
+      json["water_stagnation"] ?? {},
+    ),
     anchorBoltLooseness: AnglePipeMembersStrong.fromJson(
-      json["anchor_bolt_looseness"],
+      json["anchor_bolt_looseness"] ?? {},
     ),
     anchorBoltsRusted: AnglePipeMembersStrong.fromJson(
-      json["anchor_bolts_rusted"],
+      json["anchor_bolts_rusted"] ?? {},
     ),
     basePlateProperlySeated: AnglePipeMembersStrong.fromJson(
-      json["base_plate_properly_seated"],
+      json["base_plate_properly_seated"] ?? {},
     ),
-    gapInBasePlate: AnglePipeMembersStrong.fromJson(json["gap_in_base_plate"]),
-    groutingDamaged: AnglePipeMembersStrong.fromJson(json["grouting_damaged"]),
+    gapInBasePlate: AnglePipeMembersStrong.fromJson(
+      json["gap_in_base_plate"] ?? {},
+    ),
+    groutingDamaged: AnglePipeMembersStrong.fromJson(
+      json["grouting_damaged"] ?? {},
+    ),
     foundationTilted: AnglePipeMembersStrong.fromJson(
-      json["foundation_tilted"],
+      json["foundation_tilted"] ?? {},
     ),
     foundationSettlementOccurred: AnglePipeMembersStrong.fromJson(
-      json["foundation_settlement_occurred"],
+      json["foundation_settlement_occurred"] ?? {},
     ),
     surroundingSoilLoose: AnglePipeMembersStrong.fromJson(
-      json["surrounding_soil_loose"],
+      json["surrounding_soil_loose"] ?? {},
     ),
   );
 
@@ -307,28 +319,32 @@ class Post {
   });
 
   factory Post.fromJson(Map<String, dynamic> json) => Post(
-    postStraight: AnglePipeMembersStrong.fromJson(json["post_straight"]),
-    postTilted: AnglePipeMembersStrong.fromJson(json["post_tilted"]),
-    bendInPost: AnglePipeMembersStrong.fromJson(json["bend_in_post"]),
+    postStraight: AnglePipeMembersStrong.fromJson(json["post_straight"] ?? {}),
+    postTilted: AnglePipeMembersStrong.fromJson(json["post_tilted"] ?? {}),
+    bendInPost: AnglePipeMembersStrong.fromJson(json["bend_in_post"] ?? {}),
     crackInWeldedJoint: AnglePipeMembersStrong.fromJson(
-      json["crack_in_welded_joint"],
+      json["crack_in_welded_joint"] ?? {},
     ),
     damageInWeldedJoint: AnglePipeMembersStrong.fromJson(
-      json["damage_in_welded_joint"],
+      json["damage_in_welded_joint"] ?? {},
     ),
-    rustPresent: AnglePipeMembersStrong.fromJson(json["rust_present"]),
-    paintPeeledOff: AnglePipeMembersStrong.fromJson(json["paint_peeled_off"]),
+    rustPresent: AnglePipeMembersStrong.fromJson(json["rust_present"] ?? {}),
+    paintPeeledOff: AnglePipeMembersStrong.fromJson(
+      json["paint_peeled_off"] ?? {},
+    ),
     postThicknessReduced: AnglePipeMembersStrong.fromJson(
-      json["post_thickness_reduced"],
+      json["post_thickness_reduced"] ?? {},
     ),
     spliceBoltsTight: AnglePipeMembersStrong.fromJson(
-      json["splice_bolts_tight"],
+      json["splice_bolts_tight"] ?? {},
     ),
     spliceNutsLooseness: AnglePipeMembersStrong.fromJson(
-      json["splice_nuts_looseness"],
+      json["splice_nuts_looseness"] ?? {},
     ),
-    ladderSecure: AnglePipeMembersStrong.fromJson(json["ladder_secure"]),
-    platformStrong: AnglePipeMembersStrong.fromJson(json["platform_strong"]),
+    ladderSecure: AnglePipeMembersStrong.fromJson(json["ladder_secure"] ?? {}),
+    platformStrong: AnglePipeMembersStrong.fromJson(
+      json["platform_strong"] ?? {},
+    ),
   );
 
   Map<String, dynamic> toJson() => {
@@ -369,21 +385,21 @@ class GeneralInspection {
   factory GeneralInspection.fromJson(Map<String, dynamic> json) =>
       GeneralInspection(
         surroundingAreaSafe: AnglePipeMembersStrong.fromJson(
-          json["surrounding_area_safe"],
+          json["surrounding_area_safe"] ?? {},
         ),
         nearbyTreesTouchingStructure: AnglePipeMembersStrong.fromJson(
-          json["nearby_trees_touching_structure"],
+          json["nearby_trees_touching_structure"] ?? {},
         ),
         obstructionsPresent: AnglePipeMembersStrong.fromJson(
-          json["obstructions_present"],
+          json["obstructions_present"] ?? {},
         ),
-        windDamage: AnglePipeMembersStrong.fromJson(json["wind_damage"]),
-        rainDamage: AnglePipeMembersStrong.fromJson(json["rain_damage"]),
+        windDamage: AnglePipeMembersStrong.fromJson(json["wind_damage"] ?? {}),
+        rainDamage: AnglePipeMembersStrong.fromJson(json["rain_damage"] ?? {}),
         unauthorizedModifications: AnglePipeMembersStrong.fromJson(
-          json["unauthorized_modifications"],
+          json["unauthorized_modifications"] ?? {},
         ),
         repairsCarriedOutProperly: AnglePipeMembersStrong.fromJson(
-          json["repairs_carried_out_properly"],
+          json["repairs_carried_out_properly"] ?? {},
         ),
       );
 
@@ -405,8 +421,8 @@ class GeoLocation {
   GeoLocation({required this.latitude, required this.longitude});
 
   factory GeoLocation.fromJson(Map<String, dynamic> json) => GeoLocation(
-    latitude: json["latitude"]?.toDouble(),
-    longitude: json["longitude"]?.toDouble(),
+    latitude: (json["latitude"] ?? 0).toDouble(),
+    longitude: (json["longitude"] ?? 0).toDouble(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -432,11 +448,11 @@ class InspectionMetrics {
 
   factory InspectionMetrics.fromJson(Map<String, dynamic> json) =>
       InspectionMetrics(
-        totalQuestions: json["total_questions"],
-        yesCount: json["yes_count"],
-        noCount: json["no_count"],
-        unansweredCount: json["unanswered_count"],
-        averageYesRatio: json["average_yes_ratio"],
+        totalQuestions: json["total_questions"] ?? 0,
+        yesCount: json["yes_count"] ?? 0,
+        noCount: json["no_count"] ?? 0,
+        unansweredCount: json["unanswered_count"] ?? 0,
+        averageYesRatio: json["average_yes_ratio"] ?? 0,
       );
 
   Map<String, dynamic> toJson() => {

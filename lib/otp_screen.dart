@@ -3,11 +3,13 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:pinput/pinput.dart';
 import 'package:unipole_inspection/screens/inspection_first_screen.dart';
 
 import 'auth_service.dart';
 import 'controller/otp_controller.dart';
+import 'helper/snackbar.dart';
 
 class OtpScreen extends StatelessWidget {
   final String? phone;
@@ -19,6 +21,8 @@ class OtpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentLang = Get.locale?.languageCode;
+    final isTamil = Get.locale?.languageCode == 'ta';
     final args = Get.arguments ?? {};
     final String? phone = args['phone'];
     final String? otp = args['otp'];
@@ -58,7 +62,10 @@ class OtpScreen extends StatelessWidget {
                 text: TextSpan(
                   style: TextStyle(fontSize: 17, color: Colors.black87),
                   children: [
-                    TextSpan(text: "We sent a 6-digit verification code to \n"),
+                    TextSpan(
+                      text: "${"verification_code".tr} \n",
+                      style: TextStyle(fontSize: isTamil ? 14 : 17),
+                    ),
                     TextSpan(
                       text: phone ?? '+91 8757656676',
                       style: TextStyle(
@@ -66,7 +73,10 @@ class OtpScreen extends StatelessWidget {
                         color: Colors.blue,
                       ),
                     ),
-                    TextSpan(text: ". Please enter it below."),
+                    TextSpan(
+                      text: ". ${"enter_code_text".tr}",
+                      style: TextStyle(fontSize: isTamil ? 14 : 17),
+                    ),
                   ],
                 ),
               ),
@@ -111,11 +121,10 @@ class OtpScreen extends StatelessWidget {
                   Get.back();
 
                   if (response['success']) {
-                    Get.snackbar("Success", response['message']);
-
+                    AppToast.showSuccess(response["message"]);
                     Get.offAllNamed('/inspection');
                   } else {
-                    Get.snackbar("Error", response['message']);
+                    AppToast.showError(response["message"]);
                   }
                 },
               ),
@@ -134,13 +143,19 @@ class OtpScreen extends StatelessWidget {
                       },*/
                       onPressed: () {},
                       child: Text(
-                        "Resend OTP",
-                        style: TextStyle(color: Colors.blue, fontSize: 16),
+                        "resent_otp_text".tr,
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: isTamil ? 14 : 16,
+                        ),
                       ),
                     )
                   : Text(
-                      "Resend OTP in 00:${controller.secondsRemaining.value.toString().padLeft(2, '0')}",
-                      style: TextStyle(color: Colors.grey),
+                      "${"resent_otp_in_text".tr} 00:${controller.secondsRemaining.value.toString().padLeft(2, '0')}",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: isTamil ? 14 : 16,
+                      ),
                     );
             }),
           ],

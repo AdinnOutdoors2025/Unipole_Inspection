@@ -1,7 +1,11 @@
+import 'package:get/get_utils/src/extensions/internacionalization.dart';
+
 class Validator {
   static String? validate(String? value, String fieldName) {
     if (value == null || value.trim().isEmpty) {
-      return "$fieldName is required";
+      return 'required_field'.trParams({
+        'field': fieldName.tr,
+      });
     }
     return null;
   }
@@ -10,10 +14,10 @@ class Validator {
       String password,
       ) {
     if (value == null || value.isEmpty) {
-      return "Confirm password is required";
+      return "confirm_password_validation".tr;
     }
     if (value != password) {
-      return "Passwords do not match";
+      return "password_do_notmatch_validation".tr;
     }
     return null;
   }

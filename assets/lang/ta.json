@@ -1,10 +1,29 @@
 {
   "welcome_back": "மீண்டும் வரவேற்கிறோம்!",
-  "employee_id/username_hintText": "ஊழியர் ஐடி / பயனர் பெயர்",
+  "employee_number": "தொலைபேசி எண்",
   "password_hintText": "கடவுச்சொல்",
   "login_button": "உள்நுழை",
   "sign_up_button": "பதிவு செய்யவும்",
-  "do_not_have_account": "கணக்கு இல்லையா?",
+  "do_not_have_account": "கணக்கு இல்லையா? ",
+
+  "enter_name_hintText" : "பெயரை உள்ளிடவும்",
+  "enter_password_hintText": "கடவுச்சொல்லை உள்ளிடவும்",
+  "enter_confirm_password_hintText": "கடவுச்சொல்லை உறுதிப்படுத்தவும்",
+  "already_have_an_account": "ஏற்கனவே கணக்கு உள்ளதா? ",
+  "verification_code": "6 இலக்க (code) அனுப்பியுள்ளோம்",
+  "enter_code_text": "தயவுசெய்து கீழே உள்ளிடவும்.",
+  "resent_otp_text": "OTP மீண்டும் அனுப்பவும்",
+  "resent_otp_in_text": "OTP மீண்டும் அனுப்பப்படும் வரை",
+
+  "required_field": "@field கட்டாயம்",
+  "phone_number_login_validation": "பணியாளர் தொலைபேசி எண் கட்டாயம்",
+  "password_login_validation": "கடவுச்சொல் கட்டாயம்",
+  "name_validation": "பெயர்",
+  "phone_number_validation": "தொலைபேசி எண்",
+  "password_validation": "கடவுச்சொல்",
+  "confirm_password_validation": "கடவுச்சொல்லை உறுதிப்படுத்துவது கட்டாயம்",
+  "password_do_notmatch_validation": "கடவுச்சொற்கள் பொருந்தவில்லை",
+
 
   "inspection_first_screen_title": "ஆய்வு விவரங்களை நிரப்பவும்",
   "inspection_first_screen_subtitle": "ஆய்வைத் தொடங்க யூனிபோல் விவரங்களை உள்ளிடவும்",
@@ -18,11 +37,15 @@
   "inch": "அங்குலம்",
   "cm": "செ.மீ",
   "next_button": "அடுத்து",
+  "continue_button": "தொடரவும்",
   "back_button": "பின்",
   "submit_button": "சமர்ப்பிக்கவும்",
   "yes": "ஆம்",
   "no": "இல்லை",
-  "geo_location" : "Geo Location",
+  "geo_location" : "இருப்பிடம்",
+  "location" : "இடம்",
+  "address_hintText" : "முகவரியை உள்ளிடவும்",
+
 
   "foundation_form_title": "அடித்தளம்",
   "post_form_title": "தூண்",
@@ -71,5 +94,11 @@
   "safety_form_s4": "4. காற்று சேதம் இருக்கிறதா?",
   "safety_form_s5": "5. மழை சேதம் இருக்கிறதா?",
   "safety_form_s6": "6. அனுமதியில்லாத மாற்றங்கள் உள்ளதா?",
-  "safety_form_s7": "7. பழுது பார்க்கும் பணிகள் சரியாக செய்யப்பட்டுள்ளனவா?"
+  "safety_form_s7": "7. பழுது பார்க்கும் பணிகள் சரியாக செய்யப்பட்டுள்ளனவா?",
+
+  "final_step": "இறுதி படி",
+  "selfie_to_complete": "ஆய்வை முடிக்க செல்ஃபி எடு ",
+  "take_selfie": "செல்ஃபி எடு",
+  "retake": "மீண்டும் எடு",
+  "submit_inspection": "ஆய்வை சமர்"
 }

@@ -6,9 +6,11 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unipole_inspection/signup_screen.dart';
 
 import 'auth_service.dart';
+import 'main.dart';
 
 const Color _bgColor = Color(0xFFF6F6F8);
 const Color _headerColor = _bgColor;
@@ -44,6 +46,16 @@ class _LoginPageState extends State<LoginPage> {
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+
+
+    Future.delayed(const Duration(seconds: 3), () {
+      checkPermissions();
+    });
+  }
+
+  @override
   void dispose() {
     _employeeIdController.dispose();
     _passwordController.dispose();
@@ -73,9 +85,14 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
       if (success) {
         final data = response['data'] as Map<String, dynamic>?;
-        final user = data?['user'] as Map<String, dynamic>?;
+        final user = response["data"]["user"];
 
-        Get.offAllNamed('/inspection');
+        // Get.offAllNamed('/inspection');
+        if (user["isAdmin"] == 1) {
+          Get.offAllNamed('/adminDashboard');
+        } else {
+          Get.offAllNamed('/inspection');
+        }
       } else {
         setState(() {
           _errorMessage = message;
@@ -108,6 +125,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final currentLang = Get.locale?.languageCode;
+    final isTamil = Get.locale?.languageCode == 'ta';
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: GestureDetector(
@@ -153,10 +172,96 @@ class _LoginPageState extends State<LoginPage> {
 
                 return Column(
                   children: [
-                    _SimpleHeader(
-                      height: headerHeight,
-                      horizontalPadding: horizontalPadding,
-                      logoHeight: logoHeight,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 2,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () async {
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setString('lang', 'ta');
+                                    Get.updateLocale(const Locale('ta', 'IN'));
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 5,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: currentLang == 'ta'
+                                          ? Colors.red
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      "தமிழ்",
+                                      style: TextStyle(
+                                        color: currentLang == 'ta'
+                                            ? Colors.white
+                                            : Colors.red,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(width: 2),
+
+                                GestureDetector(
+                                  onTap: () async {
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setString('lang', 'en');
+                                    Get.updateLocale(const Locale('en', 'US'));
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 5,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: currentLang == 'en'
+                                          ? Colors.red
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      "English",
+                                      style: TextStyle(
+                                        color: currentLang == 'en'
+                                            ? Colors.white
+                                            : Colors.red,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(
+                            width: 150,
+                            child: _SimpleHeader(
+                              height: headerHeight,
+                              horizontalPadding: horizontalPadding,
+                              logoHeight: logoHeight,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     Expanded(
                       child: LayoutBuilder(
@@ -212,7 +317,9 @@ class _LoginPageState extends State<LoginPage> {
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: _textBlack,
-                                        fontSize: welcomeFont,
+                                        fontSize: /*welcomeFont*/ isTamil
+                                            ? 25
+                                            : 35,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 0.2,
                                       ),
@@ -224,12 +331,16 @@ class _LoginPageState extends State<LoginPage> {
                                     _CompactTextField(
                                       controller: _employeeIdController,
                                       focusNode: _employeeFocusNode,
-                                      hintText:
-                                          'employee_id/username_hintText'.tr,
+                                      hintText: 'employee_number'.tr,
+                                      hintTextSize: isTamil ? 13 : 15,
                                       prefixIcon: Icons.person,
-                                      keyboardType: TextInputType.emailAddress,
+                                      keyboardType: TextInputType.number,
                                       textInputAction: TextInputAction.next,
                                       height: fieldHeight,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                        LengthLimitingTextInputFormatter(10),
+                                      ],
                                       onFieldSubmitted: (_) {
                                         FocusScope.of(
                                           context,
@@ -238,7 +349,8 @@ class _LoginPageState extends State<LoginPage> {
                                       validator: (value) {
                                         if (value == null ||
                                             value.trim().isEmpty) {
-                                          return 'Employee ID is required';
+                                          return 'phone_number_login_validation'
+                                              .tr;
                                         }
                                         return null;
                                       },
@@ -249,6 +361,7 @@ class _LoginPageState extends State<LoginPage> {
                                       focusNode: _passwordFocusNode,
                                       hintText: 'password_hintText'.tr,
                                       prefixIcon: Icons.lock,
+                                      hintTextSize: isTamil ? 13 : 15,
                                       obscureText: !_showPassword,
                                       textInputAction: TextInputAction.done,
                                       height: fieldHeight,
@@ -271,7 +384,7 @@ class _LoginPageState extends State<LoginPage> {
                                       validator: (value) {
                                         if (value == null ||
                                             value.trim().isEmpty) {
-                                          return 'Password is required';
+                                          return 'password_login_validation'.tr;
                                         }
                                         return null;
                                       },
@@ -319,18 +432,27 @@ class _LoginPageState extends State<LoginPage> {
                                           onPressed: _isLoading
                                               ? null
                                               : _handleLogin,
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.transparent,
-                                            shadowColor: Colors.transparent,
-                                            disabledBackgroundColor:
-                                                Colors.transparent,
-                                            surfaceTintColor:
-                                                Colors.transparent,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(34),
-                                            ),
-                                          ),
+                                          style:
+                                              ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                shadowColor: Colors.transparent,
+                                                disabledBackgroundColor:
+                                                    Colors.transparent,
+                                                surfaceTintColor:
+                                                    Colors.transparent,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(34),
+                                                ),
+                                              ).copyWith(
+                                                overlayColor:
+                                                    MaterialStateProperty.all(
+                                                      Colors.white.withOpacity(
+                                                        0.5,
+                                                      ),
+                                                    ),
+                                              ),
                                           child: _isLoading
                                               ? const SizedBox(
                                                   height: 24,
@@ -347,9 +469,7 @@ class _LoginPageState extends State<LoginPage> {
                                                   'login_button'.tr,
                                                   style: TextStyle(
                                                     color: Colors.white,
-                                                    fontSize: isVerySmall
-                                                        ? 17
-                                                        : 19,
+                                                    fontSize: isTamil ? 15 : 16,
                                                     fontWeight: FontWeight.w800,
                                                   ),
                                                 ),
@@ -365,7 +485,7 @@ class _LoginPageState extends State<LoginPage> {
                                             text: "do_not_have_account".tr,
                                             style: TextStyle(
                                               color: _subText,
-                                              fontSize: isVerySmall ? 15 : 16,
+                                              fontSize: isTamil ? 14 : 16,
                                               fontWeight: FontWeight.w500,
                                             ),
                                             children: [
@@ -416,10 +536,9 @@ class _SimpleHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: height,
-      width: double.infinity,
       color: _headerColor,
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        padding: EdgeInsets.symmetric(horizontal: 25),
         child: Align(
           alignment: Alignment.centerRight,
           child: Image.asset(
@@ -434,7 +553,7 @@ class _SimpleHeader extends StatelessWidget {
 }
 
 class InspectionPinIcon extends StatelessWidget {
-  const InspectionPinIcon({required this.size});
+  const InspectionPinIcon({super.key, required this.size});
 
   final double size;
 
@@ -508,7 +627,7 @@ class _UnipoleHero extends StatelessWidget {
                 scale: 1.34,
                 child: SizedBox.expand(
                   child: Image.asset(
-                    'assets/images/unipole_hero.png',
+                    'assets/images/unipole_logo.jpeg',
                     fit: BoxFit.cover,
                     alignment: Alignment.topCenter,
                   ),
@@ -523,6 +642,20 @@ class _UnipoleHero extends StatelessWidget {
 }
 
 class _CompactTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final String hintText;
+  final IconData prefixIcon;
+  final String? Function(String?) validator;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final Widget? suffix;
+  final double height;
+  final double? hintTextSize;
+  final List<TextInputFormatter>? inputFormatters;
+
   const _CompactTextField({
     required this.controller,
     required this.focusNode,
@@ -535,19 +668,9 @@ class _CompactTextField extends StatelessWidget {
     this.textInputAction,
     this.onFieldSubmitted,
     this.suffix,
+    this.hintTextSize,
+    this.inputFormatters,
   });
-
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final String hintText;
-  final IconData prefixIcon;
-  final String? Function(String?) validator;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-  final TextInputAction? textInputAction;
-  final ValueChanged<String>? onFieldSubmitted;
-  final Widget? suffix;
-  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -565,11 +688,12 @@ class _CompactTextField extends StatelessWidget {
         fontSize: 17,
         fontWeight: FontWeight.w500,
       ),
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(
-          color: Color(0xFF6A6C76),
-          fontSize: 17,
+        hintStyle: TextStyle(
+          color: const Color(0xFF6A6C76),
+          fontSize: hintTextSize,
           fontWeight: FontWeight.w500,
         ),
         errorStyle: const TextStyle(

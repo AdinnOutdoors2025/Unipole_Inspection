@@ -1,70 +1,5 @@
 import 'package:flutter/services.dart';
 
-/*class SizeInputFormatter extends TextInputFormatter {
-  final String unit;
-
-  SizeInputFormatter(this.unit);
-
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue,
-      TextEditingValue newValue,
-      ) {
-    String text = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-
-    if (text.isEmpty) {
-      return const TextEditingValue(text: '');
-    }
-
-    int widthLimit;
-    int heightLimit;
-
-    // 🔥 SET LIMIT BASED ON UNIT
-    switch (unit) {
-      case "ft":
-        widthLimit = 2;
-        heightLimit = 2;
-        break;
-      case "inch":
-        widthLimit = 3;
-        heightLimit = 3;
-        break;
-      case "cm":
-        widthLimit = 4;
-        heightLimit = 4;
-        break;
-      default:
-        widthLimit = 2;
-        heightLimit = 2;
-    }
-
-    int maxLength = widthLimit + heightLimit;
-
-    if (text.length > maxLength) {
-      text = text.substring(0, maxLength);
-    }
-
-    String formatted;
-
-    if (text.length <= widthLimit) {
-      // typing width
-      formatted = text;
-      if (text.length == widthLimit) {
-        formatted = "$text x ";
-      }
-    } else {
-      // typing height
-      String width = text.substring(0, widthLimit);
-      String height = text.substring(widthLimit);
-      formatted = "$width x $height";
-    }
-
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
-    );
-  }
-}*/
 class SizeInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -73,12 +8,42 @@ class SizeInputFormatter extends TextInputFormatter {
   ) {
     String text = newValue.text;
 
-    // Allow only numbers, x, and space
-    text = text.replaceAll(RegExp(r'[^0-9xX ]'), '');
+    // Allow only digits and x
+    text = text.replaceAll(RegExp(r'[^0-9xX]'), '');
+
+    // Convert X → x
+    text = text.replaceAll('X', 'x');
+
+    // Allow only one 'x'
+    if ('x'.allMatches(text).length > 1) {
+      return oldValue;
+    }
+
+    // Split into parts
+    List<String> parts = text.split('x');
+
+    String left = parts[0];
+    String right = parts.length > 1 ? parts[1] : "";
+
+    // Limit left side to 3 digits
+    if (left.length > 3) {
+      left = left.substring(0, 3);
+    }
+
+    // Limit right side to 3 digits
+    if (right.length > 3) {
+      right = right.substring(0, 3);
+    }
+
+    // Rebuild WITHOUT forcing 'x'
+    String newText = left;
+    if (text.contains('x')) {
+      newText += 'x$right';
+    }
 
     return TextEditingValue(
-      text: text,
-      selection: TextSelection.collapsed(offset: text.length),
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
     );
   }
 }

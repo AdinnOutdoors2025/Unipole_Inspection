@@ -46,6 +46,8 @@ dependencies:
   camera: ^0.10.5
   fluttertoast: ^8.2.6
   flutter_launcher_icons: ^0.14.4
+  shared_preferences: ^2.5.5
+
   flutter_localizations:
     sdk: flutter
 
@@ -80,6 +82,7 @@ flutter:
     - assets/images/adinn_logo.png
     - assets/images/unipole_hero.png
     - assets/images/unipole_logo.jpeg
+    - assets/images/loader.mp4
     - .env
     - assets/lang/en.json
     - assets/lang/ta.json

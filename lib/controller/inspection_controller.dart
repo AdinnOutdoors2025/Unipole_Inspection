@@ -25,8 +25,6 @@ class InspectionController extends GetxController {
   var isLocationFetched = false.obs;
   var isExistingInspection = false.obs;
 
-  /*var latitude = '--'.obs;
-  var longitude = '--'.obs;*/
   RxString latitude = "--".obs;
   RxString longitude = "--".obs;
 
@@ -36,9 +34,8 @@ class InspectionController extends GetxController {
 
     visitedByController = TextEditingController();
     loadUser();
-    loadInspectionData();
-    fetchLocation();
-    // initInspection();
+
+    initInspection();
     final now = DateTime.now();
     final formattedDate = DateFormat('dd MMMM yyyy').format(now);
 
@@ -83,7 +80,7 @@ class InspectionController extends GetxController {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      AppSnackBar.showError("Please enable location services");
+      AppToast.showError("Please enable location services");
       return;
     }
 
@@ -92,28 +89,32 @@ class InspectionController extends GetxController {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        AppSnackBar.showError("Location permission denied");
+        AppToast.showError("Location permission denied");
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      AppSnackBar.showError("Permission permanently denied");
+      AppToast.showError("Permission permanently denied");
       return;
     }
     try {
+      if (kDebugMode) {
+        print("fetchLocation() started");
+      }
       isFetchingLocation.value = true;
       isLocationFetched.value = false;
 
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-
+      print("Device latitude: ${position.latitude}");
+      print("Device longitude: ${position.longitude}");
       latitude.value = position.latitude.toStringAsFixed(6);
       longitude.value = position.longitude.toStringAsFixed(6);
       isLocationFetched.value = true;
     } catch (e) {
-      AppSnackBar.showError("Failed to fetch location");
+      AppToast.showError("Failed to fetch location");
     } finally {
       isFetchingLocation.value = false;
     }
@@ -126,7 +127,7 @@ class InspectionController extends GetxController {
         sizeController.text.isEmpty ||
         locationController.text.isEmpty ||
         latitude.value == "--") {
-      AppSnackBar.showError("Please fill all fields");
+      AppToast.showError("Please fill all fields");
       return;
     }
 
@@ -144,59 +145,50 @@ class InspectionController extends GetxController {
       }
       Get.toNamed('/multiForm');
     } else {
-      AppSnackBar.showError(result["message"]);
+      AppToast.showError(result["message"]);
     }
   }
 
   Future<void> loadInspectionData() async {
-    print("fehfuewa");
     final res = await apiService.getInspection();
-    print("API response received");
     print(res);
     if (res.success && res.data != null) {
-      print("Data exists");
       isExistingInspection.value = true;
 
       final data = res.data;
-      print("Location: ${data.location}");
-      print("Height: ${data.unipoleHeight}");
-      print("Size: ${data.adStructureSize}");
-      print("Visited By: ${data.visitedBy}");
-      print("Date: ${data.visitingDate}");
-      print("Latitude: ${data.geoLocation.latitude}");
-      print("Longitude: ${data.geoLocation.longitude}");
 
-      locationController.text = data.location;
-      print(locationController.text);
+      locationController.text = data.location ?? "";
       heightController.text = data.unipoleHeight;
       sizeController.text = data.adStructureSize;
       setHeightFromApi(data.unipoleHeight);
       setSizeFromApi(data.adStructureSize);
-      visitedByController.text = data.visitedBy;
+      //visitedByController.text = data.visitedBy;
+      final apiVisitedBy = data.visitedBy;
+      if (kDebugMode) {
+        print("inspection id: ${data.inspectionId}");
+      }
+      if (apiVisitedBy != null && apiVisitedBy.trim().isNotEmpty) {
+        visitedByController.text = apiVisitedBy;
+      } else {
+        visitedByController.text = userName.value;
+      }
 
-      selectedDate.value = data.visitingDate;
-      /* latitude.value = data.geoLocation.latitude.toString();
-      longitude.value = data.geoLocation.longitude.toString();*/
-      latitude.value = data.geoLocation.latitude?.toString() ?? '--';
-      longitude.value = data.geoLocation.longitude?.toString() ?? '--';
-
-      isLocationFetched.value = true;
+      if (data.visitingDate != null && data.visitingDate.isNotEmpty) {
+        selectedDate.value = data.visitingDate;
+      } else {
+        final now = DateTime.now();
+        selectedDate.value = DateFormat('dd MMMM yyyy').format(now);
+      }
+      latitude.value = data.geoLocation.latitude.toString();
+      longitude.value = data.geoLocation.longitude.toString();
     } else {
-      print("No inspection data");
+      if (kDebugMode) {
+        print("No inspection data");
+      }
       isExistingInspection.value = false;
     }
   }
 
-  /*Future<void> initInspection() async {
-    await loadInspectionData();
-
-    */ /*if (!isExistingInspection.value) {
-      fetchLocation();
-    }*/ /*
-    if (latitude.value == '--' || longitude.value == '--') {
-      await fetchLocation();
-    }
-  }*/
   Future<void> initInspection() async {
     if (kDebugMode) {
       print("initInspection started");
@@ -205,16 +197,18 @@ class InspectionController extends GetxController {
     await loadInspectionData();
 
     if (kDebugMode) {
-      print("isExistingInspection: ${isExistingInspection.value}");
-    }
-    if (kDebugMode) {
       print("latitude after API: ${latitude.value}");
+      print("longitude after API: ${longitude.value}");
     }
 
-    if (!isExistingInspection.value || latitude.value == '--' || longitude.value == '--') {
+    if (latitude.value == "--" ||
+        longitude.value == "--" ||
+        latitude.value == "0.0" ||
+        longitude.value == "0.0") {
       if (kDebugMode) {
-        print("Fetching device location...");
+        print("API location empty → Fetching device location...");
       }
+
       await fetchLocation();
     } else {
       if (kDebugMode) {
@@ -228,7 +222,6 @@ class InspectionController extends GetxController {
 
     final parts = value.trim().split(" ");
 
-    // Example: "10 inch" or "10 ft ft"
     heightController.text = parts.first;
 
     if (parts.length > 1) {
@@ -241,7 +234,6 @@ class InspectionController extends GetxController {
 
     final parts = value.trim().split(" ");
 
-    // Example: "10 X 40 FT"
     if (parts.length >= 3) {
       sizeController.text = "${parts[0]} ${parts[1]} ${parts[2]}";
     } else {
