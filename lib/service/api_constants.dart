@@ -8,4 +8,5 @@ class ApiConstants {
   static const String createInspection = "/inspections";
   static const String getInspectionDetails = "/inspections";
   static const String getDashBoard = "/auth/dashboard";
+  static const String getDashBoardInspectionDetails = "/inspections/getAllInspections";
 }

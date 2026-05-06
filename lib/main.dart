@@ -10,12 +10,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unipole_inspection/app_translations.dart';
 import 'package:unipole_inspection/otp_screen.dart';
 import 'package:unipole_inspection/screens/admin_screens/dashboard.dart';
+import 'package:unipole_inspection/screens/admin_screens/inspection_screen.dart';
 import 'package:unipole_inspection/screens/inspection_first_screen.dart';
 import 'package:unipole_inspection/screens/inspection_screens/multi_step_form.dart';
 import 'package:unipole_inspection/screens/inspection_submit_screen.dart';
 import 'package:unipole_inspection/signup_screen.dart';
 import 'package:unipole_inspection/widgets/video_loader.dart';
 import 'auth_service.dart';
+import 'binding/admin_inspection_binding.dart';
 import 'binding/dashboard_binding.dart';
 import 'binding/inspection_binding.dart';
 import 'binding/inspection_submit_binding.dart';
@@ -80,6 +82,11 @@ class MyApp extends StatelessWidget {
           page: () => Dashboard(),
           binding: DashboardBinding(),
         ),
+        GetPage(
+          name: '/adminInspectionScreen',
+          page: () => InspectionScreen(),
+          binding: AdminInspectionBinding(),
+        ),
       ],
     );
   }
@@ -104,7 +111,6 @@ class _SplashCheckPageState extends State<SplashCheckPage> {
   Future<void> _checkLogin() async {
     final loggedIn = await _authService.isLoggedIn();
     if (!mounted) return;
-
 
     if (loggedIn) {
       final storage = const FlutterSecureStorage();

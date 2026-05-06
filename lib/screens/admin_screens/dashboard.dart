@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:unipole_inspection/controller/dashboard_controller.dart';
 
@@ -72,11 +73,16 @@ class Dashboard extends StatelessWidget {
                   mainAxisSpacing: 5,
                   padding: EdgeInsets.all(10),
                   children: [
-                    inspectionCard(
-                      "Total",
-                      data.inspectionTotalCount.toString(),
-                      Colors.blue,
-                      Icons.assignment,
+                    GestureDetector(
+                      onTap: () {
+                        Get.toNamed('/adminInspectionScreen');
+                      },
+                      child: inspectionCard(
+                        "Total",
+                        data.inspectionTotalCount.toString(),
+                        Colors.blue,
+                        Icons.assignment,
+                      ),
                     ),
                     inspectionCard(
                       "Completed",

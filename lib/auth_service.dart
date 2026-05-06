@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:unipole_inspection/model/dashboard_model.dart';
+import 'package:unipole_inspection/model/inspection_details_model.dart';
 import 'package:unipole_inspection/service/api_constants.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
@@ -357,6 +358,51 @@ class AuthService {
     final json = jsonDecode(response.body);
 
     return DashboardModel.fromJson(json);
+  }
+
+  /*Future<InspectionDetailsModel> getInspectionDetails() async {
+    final token = await getToken();
+
+    final response = await http.get(
+      Uri.parse("${ApiConstants.baseUrl}${ApiConstants.getDashBoardInspectionDetails}"),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    final json = jsonDecode(response.body);
+
+    return InspectionDetailsModel.fromJson(json);
+  }*/
+  Future<InspectionDetailsModel> getInspectionDetails({
+    String? name,
+    String? phone,
+    String? fromDate,
+    String? toDate,
+    int? status,
+    String? inspectionStatus,
+  }) async {
+    final token = await getToken();
+
+    final queryParams = {
+      if (name != null && name.isNotEmpty) "visited_by": name,
+      if (phone != null && phone.isNotEmpty) "visited_by_phone": phone,
+      if (fromDate != null) "from_date": fromDate,
+      if (toDate != null) "to_date": toDate,
+      if (status != null) "inspection_status": status.toString(),
+      if (inspectionStatus != null)
+        "inspection_flag": inspectionStatus.toString(),
+    };
+
+    final uri = Uri.parse(
+      "${ApiConstants.baseUrl}${ApiConstants.getDashBoardInspectionDetails}",
+    ).replace(queryParameters: queryParams);
+
+    final response = await http.get(
+      uri,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    final json = jsonDecode(response.body);
+    return InspectionDetailsModel.fromJson(json);
   }
 
   Future<String?> getToken() async {
