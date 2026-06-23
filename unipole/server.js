@@ -6,7 +6,7 @@ const connectDB = require('./db');
 const { startInspectionScheduler, getSchedulerStatus } = require('./utils/schedulerService');
 
 require('./utils/cronjobs');
-
+//demo
 dotenv.config();
 
 const app = express();
